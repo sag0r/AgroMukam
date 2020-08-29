@@ -1,0 +1,186 @@
+/* === Main Parent of All Menu Structure === */
+.menu_vert { display:none;}
+.menuShopen {
+	margin: 0;
+	padding: 0;
+	position: relative;
+}
+/* === Subcategories Parent === */
+.menuShopen ul {
+	top: 0;
+	display: none;
+	left: 100%;
+	margin: 0;
+	margin: 1px 0 0 0;
+	padding: 0;
+	position: absolute;
+	z-index:2;
+	zoom:1;
+	width:100%;
+	border:0;
+	margin-left:1px;
+}
+/* === Items of Menu === */
+.menuShopen li {
+	display:block;
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	text-align: left;
+	zoom: 1;
+	position:relative;
+}
+/* === Links of Menu === */
+.menuShopen a {
+	display: block;
+	position:relative;
+	outline:none !important;
+}
+/* === Parent Element for Scrolling === */
+.shopen-content>li:last-child {
+	border-bottom:0;
+}
+/* === Element (right arrow) which showing subcategories and manages === */
+.arrow-right {
+	top:0;
+	right:0;
+	position:absolute;
+	height:100%;
+}
+.arrow-right:after {
+	content:'';
+}
+.menuShopen,
+.menuShopen *, 
+.menuShopen *:after, 
+.menuShopen *:brfore {
+	box-sizing:border-box;
+}
+.menuShopen li.mJoinTop {
+	position:static
+}
+/* === Controls scrolling === */
+.scrollNav {
+	position:absolute;
+	left:50%;
+	margin:0 0 0 -20px;
+	width:40px;
+	height:30px;
+	display:none !important;
+	cursor:pointer;
+}
+.scrollNav:after {
+	content:'';
+	width:6px;
+	height:6px;
+	border:1px solid rgba(0,0,0,0.5);
+	border-width:2px 2px 0 0;
+	position:absolute;
+	top:50%;
+	left:50%;
+	margin:0px 0 0 -4px;
+}
+.scrollNav.scrollTop {
+	top:-5px;
+	border-radius:0 0 5px 5px;
+}
+.scrollNav.scrollTop:after {
+	-webkit-transform:rotate(-45deg);
+	-moz-transform:rotate(-45deg);
+	-o-transform:rotate(-45deg);
+	-ms-transform:rotate(-45deg);
+	transform:rotate(-45deg);
+}
+.scrollNav.scrollBottom {
+	bottom:-5px;
+	border-radius:5px 5px 0 0;
+}
+.scrollNav.scrollBottom:after {
+	-webkit-transform: rotate(135deg);
+	-moz-transform: rotate(135deg);
+	-o-transform: rotate(135deg);
+	-ms-transform: rotate(135deg);
+	transform: rotate(135deg);
+	margin-top:-7px;
+}
+.menuShopen>.shopen .scrollNav {
+	display:none;
+}
+
+/*--CSS for Scroller--*/
+.shopen {
+  position : relative;
+  width    : 100%;
+  height   : 100%;
+  overflow : hidden;
+}
+.shopen > .shopen-content {
+  position      : absolute;
+  overflow      : scroll;
+  overflow-x    : hidden;
+  top           : 0;
+  right         : 0;
+  bottom        : 0;
+  left          : 0;
+}
+.shopen > .shopen-content:focus {
+  outline: thin dotted;
+}
+.shopen > .shopen-content::-webkit-scrollbar {
+  display: none;
+}
+.has-scrollbar > .shopen-content::-webkit-scrollbar {
+  display: block;
+}
+.shopen > .shopen-pane {
+  background :  rgba(0,0,0,.10);
+  position   : absolute;
+  width      : 7px;
+  right      : 0;
+  top        : 0;
+  bottom     : 0;
+  visibility : hidden\9;
+  opacity    : .01;
+  -webkit-transition    : .2s;
+  -moz-transition       : .2s;
+  -o-transition         : .2s;
+  transition            : .2s;
+  -moz-border-radius    : 5px;
+  -webkit-border-radius : 5px;
+  border-radius         : 5px;
+}
+.shopen > .shopen-pane > .shopen-slider {
+  position              : relative;
+  margin                : 0 1px;
+  -moz-border-radius    : 3px;
+  -webkit-border-radius : 3px;
+  border-radius         : 3px;
+  opacity 				: 0.6
+}
+.shopen:hover > .shopen-pane, .shopen-pane.active, .shopen-pane.flashed {
+  visibility : visible\9; 
+  opacity    : 0.99;
+}
+#superShowBase .superShow { display:block !important; opacity:0 !important}
+
+/*CSS for Mobile Devices*/
+@media (max-width: 991px) {
+.menuResp .arrow-right {
+	right:auto;
+	left:0;
+}
+.menuResp .mOpen > a:after {
+	display:none !important;
+}
+li[data-sublist]>a:before {
+	display:none !important;
+}
+.menuResp.menuShopen ul {
+	position: relative;
+	margin:0;
+	border:0;
+	box-shadow:none;
+	left:0 !important;
+	top:0 !important;
+}
+}

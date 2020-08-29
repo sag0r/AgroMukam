@@ -1,0 +1,209 @@
+﻿@using Nop.Core
+@using Nop.Core.Domain.Tax
+@using Nop.Services.Configuration
+
+@model FooterModel
+
+@inject IWorkContext workContext
+@inject IStoreContext storeContext
+@inject ISettingService settingService
+@inject IWebHelper webHelper
+
+@{
+    var storeId = storeContext.CurrentStore.Id;
+    var userAgent = Url.ActionContext.HttpContext.Request.Headers["User-Agent"];
+    var removeCopyright = settingService.GetSettingByKey("venturethemesettings.removecopyright", false, storeId, true);
+    var removeDesignedBy = settingService.GetSettingByKey("venturethemesettings.removedesignedby", false, storeId, true);
+
+    var controllerName = Url.ActionContext.RouteData.Values["controller"].ToString();
+    var isHomePage = controllerName.Equals("home", StringComparison.InvariantCultureIgnoreCase);
+
+    var isIe9 = false;
+    if (!String.IsNullOrEmpty(userAgent) && userAgent.ToString().ToLower().IndexOf("MSIE 9.0", StringComparison.InvariantCultureIgnoreCase) > 0)
+    {
+        isIe9 = true;
+    }
+
+    var showFooterMap = settingService.GetSettingByKey("venturethemesettings.enablefootermap", true, storeId, true);
+
+    var isLoggedIn = !String.IsNullOrEmpty(workContext.CurrentCustomer.Email);
+    var loginUrl = Url.RouteUrl("VendorLogin", new { returnUrl = this.Context.Request.Query["returnUrl"] }, webHelper.CurrentRequestProtocol);
+    var vendorLoginUrl = isLoggedIn ? "/Admin" : loginUrl;
+}
+
+@if (isHomePage)
+{
+    <div class="home-page-footer-banners">
+        @await Component.InvokeAsync("Widget", new { widgetZone = "venture_theme_footer_banner_1" })
+        @await Component.InvokeAsync("Widget", new { widgetZone = "venture_theme_footer_banner_2" })
+        @await Component.InvokeAsync("Widget", new { widgetZone = "venture_theme_footer_banner_3" })
+    </div>
+
+    <div class="courier-partners">
+        <div class="cp-wrap">
+            <ul>
+                <li>
+                    <span>@T("Footer.CourierPartners"): </span>
+                </li>
+                <li>
+                    <img src="/Themes/Venture/Content/img/courier-partners/courier-logo1.jpg" />
+                </li>
+                <li>
+                    <img src="/Themes/Venture/Content/img/courier-partners/courier-logo2.jpg" />
+                </li>
+                <li>
+                    <img src="/Themes/Venture/Content/img/courier-partners/courier-logo3.jpg" />
+                </li>
+                <li>
+                    <img src="/Themes/Venture/Content/img/courier-partners/courier-logo4.jpg" />
+                </li>
+                <li>
+                    <img src="/Themes/Venture/Content/img/courier-partners/courier-logo5.jpg" />
+                </li>
+                <li>
+                    <img src="/Themes/Venture/Content/img/courier-partners/courier-logo6.jpg" />
+                </li>
+                <li>
+                    <img src="/Themes/Venture/Content/img/courier-partners/courier-logo7.jpg" />
+                </li>
+                <li>
+                    <img src="/Themes/Venture/Content/img/courier-partners/courier-logo8.jpg" />
+                </li>
+                <li>
+                    <img src="/Themes/Venture/Content/img/courier-partners/courier-logo9.jpg" />
+                </li>
+            </ul>
+
+
+
+        </div>
+    </div>
+}
+
+
+<div class="footer">
+    <div class="footer-upper">
+        <div class="footer-block find-us">
+            <div class="title">
+                <strong>@T("Footer.KnowUsBetter")</strong>
+            </div>
+            <ul class="list footer-collapse">
+                <li class="nav-item">
+                    <a href="/about-us" class="nav-link">@T("Footer.KnowUsBetter.AboutUs")</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">@T("Footer.KnowUsBetter.WhyAgroMukam")</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">@T("Footer.KnowUsBetter.Careers")</a>
+                </li>
+                <li class="nav-item">
+                    <a href="@Url.RouteUrl("ContactUs")" class="nav-link">@T("Footer.KnowUsBetter.ContactUs")</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">@T("Footer.KnowUsBetter.Testimonials")</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">@T("Footer.KnowUsBetter.NewArrivals")</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">@T("Footer.KnowUsBetter.AgriSale")</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">@T("Footer.KnowUsBetter.TodaysOffer")</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">@T("Footer.KnowUsBetter.AgriTalk")</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">@T("Footer.KnowUsBetter.HowReferralWorks")</a>
+                </li>
+            </ul>
+        </div>
+        <div class="footer-block information">
+            <div class="title">
+                <strong>@T("Footer.OurPolicies")</strong>
+            </div>
+            <ul class="list footer-collapse">
+                <li class="nav-item">
+                    <a href="#" class="nav-link">@T("Footer.OurPolicies.PrivacyPolicy")</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">@T("Footer.OurPolicies.ShippingDelivery")</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">@T("Footer.OurPolicies.CancellationPolicy")</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">@T("Footer.OurPolicies.ReturnPolicy")</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">@T("Footer.OurPolicies.FAQ")</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">@T("Footer.OurPolicies.TermsOfUse")</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">@T("Footer.OurPolicies.SellerTermsAndConditions")</a>
+                </li>
+            </ul>
+        </div>
+        <div class="footer-block my-account">
+            <div class="title">
+                <strong>@T("Footer.Services")</strong>
+            </div>
+            <ul class="list footer-collapse">
+                <li class="nav-item">
+                    <a href="#" class="nav-link">@T("Footer.Services.SellOnAgroMukam")</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">@T("Footer.Services.BestServices")</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">@T("Footer.Services.Sitemap")</a>
+                </li>
+                <li class="nav-item">
+                    <a href="@Url.RouteUrl("CustomerInfo")" class="nav-link">@T("Footer.CustomerLogin")</a>
+                </li>
+                @*<li class="nav-item">
+                    <a href="@Url.RouteUrl("CustomerInfo")" class="nav-link">@T("Footer.DoctorLogin")</a>
+                </li>*@
+                <li class="nav-item">
+                    <a href="@vendorLoginUrl" class="nav-link">@T("Footer.VendorLogin")</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <div class="footer-middle">
+        @await Component.InvokeAsync("SocialButtons")
+    </div>
+    <div class="footer-lower">
+        <div class="footer-disclaimer">
+            @T("Content.CopyrightNotice", DateTime.Now.Year, Model.StoreName)
+        </div>
+        @if (!removeCopyright)
+        {
+            <div class="footer-powered-by">
+                Powered by <a href="http://www.nopcommerce.com/">nopCommerce</a>
+                @*Would you like to remove the "Powered by nopCommerce" link in the bottom of the footer?
+                    Find more info here http://www.nopcommerce.com/copyrightremoval.aspx*@
+            </div>
+        }
+        @if (!removeDesignedBy)
+        {
+            <div class="footer-designed-by">
+                Designed by <a href="http://www.nop-templates.com/" target="_blank">Nop-Templates.com</a>
+            </div>
+        }
+        @if (Model.DisplayTaxShippingInfoFooter)
+        {
+            var inclTax = workContext.TaxDisplayType == TaxDisplayType.IncludingTax;
+            <div class="footer-tax-shipping">
+                @T(inclTax ? "Footer.TaxShipping.InclTax" : "Footer.TaxShipping.ExclTax", Url.RouteUrl("Topic", new { SeName = Html.GetTopicSeName("shippinginfo") }))
+            </div>
+        }
+
+        @await Component.InvokeAsync("StoreThemeSelector")
+    </div>
+    @await Component.InvokeAsync("Widget", new { widgetZone = PublicWidgetZones.Footer })
+</div>

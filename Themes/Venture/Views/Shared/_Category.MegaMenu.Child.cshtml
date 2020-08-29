@@ -1,0 +1,18 @@
+﻿@model List<CategorySimpleModel>
+@{
+//var categories = Model.OrderByDescending(x => x.SubCategories.Count).ToList();
+}
+@foreach (var category in Model)
+{
+    <li class="p-1">
+        <a href="@Url.RouteUrl("Category", new { SeName = category.SeName })" title="@category.RollOverText">
+            @category.Name
+        </a>
+        @if (category.HaveSubCategories)
+        {
+            <ul>
+                @await Html.PartialAsync("_Category.MegaMenu.Child", category.SubCategories)
+            </ul>
+        }
+    </li>
+}

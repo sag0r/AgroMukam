@@ -1,0 +1,58 @@
+﻿@using Nop.Services.Catalog
+@inject ICategoryService _categoryService
+@{
+    var rootCategories = _categoryService.GetAllCategoriesByParentCategoryId(0)
+        .Where(c => !c.Name.Contains("Courier") && !c.Name.Contains("Service"))
+        .OrderBy(x => x.DisplayOrder)
+        .Select(x =>
+        {
+            return new SelectListItem
+            {
+                Text = x.Name,
+                Value = x.Id.ToString()
+            };
+        })
+        .ToList();
+}
+
+
+<form id="CustomSearchForm" asp-controller="Catalog" asp-action="Search" method="post">
+    <div class="home-page-filters-wrapper ajax-filters-pro custom-filter">
+        <div class="home-page-filters">
+            <div class="home-page-filter-title"><strong>Find the products you like:</strong></div>
+            <div class="home-page-filter-selector">
+                <select name="cid" id="cid" class="form-control w-100">
+                    @foreach (var category in rootCategories)
+                    {
+                        <option value="@category.Value">@category.Text</option>
+                    }
+                </select>
+            </div>
+            <div class="home-page-filter-selector">
+                <select name="cfid" id="cfid" class="form-control w-100" disabled>
+                    <option value="0">...</option>
+                    <option value="1">Discounts</option>
+                    <option value="2">Offers</option>
+                    <option value="3">Month End Offer</option>
+                    <option value="4">Free Delivery</option>
+                    <option value="5">Campaigns</option>
+                    <option value="6">Promotional Offers</option>
+                </select>
+            </div>
+            <div class="home-page-filter-button"><span id="home-page-filter-total-products-count" class="results-number"></span> <button type="submit" class="search-button btn-custom-search" disabled="">Search</button></div>
+        </div>
+    </div>
+</form>
+<script asp-location="Footer">
+    $(document).ready(function () {
+        //$("#cid").kendoDropDownList();
+        $('#cid').change(function() {
+            if ($(this).val() > 0) {
+                $('.btn-custom-search, #cfid').removeAttr('disabled');
+            } else {
+                $('#cfid option[value="0"]').attr("selected", "selected");
+                $('.btn-custom-search, #cfid').attr('disabled', true);
+            }
+        })
+    });
+</script>

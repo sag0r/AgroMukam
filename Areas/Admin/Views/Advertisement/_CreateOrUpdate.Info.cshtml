@@ -1,0 +1,147 @@
+﻿@using Nop.Web.Areas.Admin.Models.Advertisements
+@using Nop.Services.Catalog
+@using Nop.Core.Domain.Advertisements 
+
+@model AdvertisementModel
+@inject  ICategoryService _categoryService;
+
+@{ 
+    var temp = _categoryService.GetAllCategoriesByParentCategoryId(0);
+    var categories = temp.Select(x =>
+    {
+        return new SelectListItem
+        {
+            Text = x.Name,
+            Value = x.Id.ToString()
+        };
+    });
+}
+
+<div class="panel-body">
+    <div class="panel-group">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-label asp-for="Name" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="Name" />
+                        <span asp-validation-for="Name"></span>
+                        <em>@T("Admin.Promotions.Advertisements.AdvertisementNameHint")</em>
+                    </div>
+                </div>
+            </div>
+            <div class="panel-body">
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-label asp-for="Caption" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="Caption" />
+                        <span asp-validation-for="Caption"></span>
+                        <em>@T("Admin.Promotions.Advertisements.AdvertisementCaptionHint")</em>
+                    </div>
+                </div>
+            </div>
+            <div class="panel-body">
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-label asp-for="CategoryId" />
+                    </div>
+                    <div class="col-md-9">
+                        <select asp-for="CategoryId" class="form-control">
+                            <option value="0">N/A</option>
+                            @foreach(var category in categories)
+                            {
+                                <option value="@category.Value">@category.Text</option>
+                            }
+                        </select>
+                        <span asp-validation-for="CategoryId"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="panel-body">
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-label asp-for="AdPlacementId" />
+                    </div>
+                    <div class="col-md-9">
+                        <select asp-for="AdPlacementId" class="form-control">
+                            <option value="10">Home Page Top</option>
+                            <option value="20">Home Page Category Ads</option>
+                            <option value="30">Home Page Category Wise Featured Ads</option>
+                            <option value="40">Home Page Featured Products</option>
+                            <option value="50">Mega Menu Category Wise Ads</option>
+                            <option value="60">First Category Page Ads</option>
+                            <option value="70">Second Category Page Ads</option>
+                            <option value="80">Vendor Login Page Ads</option>
+                            <option value="90">Other Login Page Ads</option>
+                        </select>
+                        <span asp-validation-for="AdPlacementId"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="panel-body">
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-label asp-for="AdTypeId" />
+                    </div>
+                    <div class="col-md-9">
+                        <select asp-for="AdTypeId" class="form-control">
+                            <option value="0">N/A</option>
+                            <option value="1">Banner</option>
+                            <option value="2">Company Logo</option>
+                        </select>
+                        <span asp-validation-for="AdTypeId"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="panel-body">
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-label asp-for="PictureId" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="PictureId" />
+                        <span asp-validation-for="PictureId"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="panel-body">
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-label asp-for="HyperLink" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="HyperLink" />
+                        <span asp-validation-for="HyperLink"></span>
+                        <em>@T("Admin.Promotions.Advertisements.AdvertisementHyperLinkHint")</em>
+                    </div>
+                </div>
+            </div>
+            <div class="panel-body">
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-label asp-for="StartDateUtc" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="StartDateUtc" />
+                        <span asp-validation-for="StartDateUtc"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="panel-body">
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-label asp-for="EndDateUtc" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="EndDateUtc" />
+                        <span asp-validation-for="EndDateUtc"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,23 @@
+﻿@using Nop.Core
+@using Nop.Core.Infrastructure
+@using Nop.Services.Configuration
+@using Microsoft.AspNetCore.WebUtilities
+
+@inject ISettingService settingService
+@inject IStoreContext storeContext
+
+@{
+    Layout = "_ColumnsOne";
+
+    //page class
+    Html.AppendPageCssClassParts("html-featured-products-page");
+
+    var storeId = storeContext.CurrentStore.Id;
+    var homePageProductBoxLayout = settingService.GetSettingByKey("venturethemesettings.homepageitemboxlayout", "layout-1", storeId, true);
+    var homePageProductBoxLayoutClass = "product-box-" + homePageProductBoxLayout;
+}
+<div class="page featured-products-page @homePageProductBoxLayoutClass">
+    <div class="page-body">
+        @await Component.InvokeAsync("HomepageProducts")
+    </div>
+</div>

@@ -1,0 +1,68 @@
+﻿@model int
+@using Nop.Services.Orders
+@using Nop.Web.Factories
+@inject IOrderService _orderService
+@inject IOrderModelFactory _orderModelFactory
+
+@{
+    var orderDetails = _orderService.GetOrderById(Model);
+    var miniDetailModel = _orderModelFactory.PrepareOrderDetailsModel(orderDetails);
+}
+
+    <div class="mini-order-details">
+
+        @if (miniDetailModel.Items.Count > 0)
+        {
+            <div class="table-wrapper">
+                <table class="data-table">
+                    <tbody>
+                        @foreach (var item in miniDetailModel.Items)
+                        {
+                        <tr>
+                            <td class="product">
+                                @if (!miniDetailModel.PrintMode)
+                                {
+                                    <em><a class="d-block" style="height: 20px; max-width: 320px; overflow: hidden;" href="@Url.RouteUrl("Product", new { SeName = item.ProductSeName })">@item.ProductName</a></em>
+                                }
+                                else
+                                {
+                                    @item.ProductName
+                                }
+                            </td>
+                            <td class="quantity" style="min-width: 100px;">
+                                <label class="td-title">Qty:</label>
+                                <span class="product-quantity">@item.Quantity</span>
+                            </td>
+                            <td class="order-status">
+                                <label class="td-title badge badge-pill badge-secondary">@miniDetailModel.OrderStatus</label>
+                            </td>
+                            <td class="eta-delivery">
+
+                                @if (miniDetailModel.ShippingStatus != "Delivered")
+                                {
+                                    var orderDate = miniDetailModel.CreatedOn;
+                                    var fourthDay = orderDate.AddDays(4);
+                                    var eighthDay = orderDate.AddDays(8);
+                                    var sameMonth = fourthDay.ToString("MMMM") == eighthDay.ToString("MMMM");
+                                    <label class="td-title text-greenish">
+                                        Estimated Delivery By
+                                        @fourthDay.Day
+                                        @(sameMonth ? "" : fourthDay.ToString("MMMM"))
+                                        - @eighthDay.Day @eighthDay.ToString("MMMM")
+                                        @eighthDay.Year
+                                    </label>
+                                }
+                                else
+                                {
+                                    <label class="td-title text-greenish"> @miniDetailModel.ShippingStatus </label>
+                                }
+
+                            </td>
+                        </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+
+    </div>

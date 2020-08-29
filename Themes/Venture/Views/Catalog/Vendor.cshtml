@@ -1,0 +1,274 @@
+﻿@model VendorModel
+@using Nop.Core.Domain.Seo
+@using Nop.Services.Catalog 
+@using Nop.Services.Customers
+@using Nop.Web.Factories
+@inject Nop.Core.IWebHelper webHelper
+@inject SeoSettings seoSettings
+@inject ICustomerService _customerService
+@inject IProductService _productService
+@inject IProductModelFactory _productModelFactory
+@{
+    Layout = "_ColumnsOne";
+
+    //title
+    Html.AddTitleParts(Model.SystemName);
+    //meta
+    Html.AddMetaDescriptionParts(Model.MetaDescription);
+    Html.AddMetaKeywordParts(Model.MetaKeywords);
+    //page class
+    Html.AppendPageCssClassParts("html-vendor-page");
+
+    if (seoSettings.CanonicalUrlsEnabled)
+    {
+        var vendorUrl = Url.RouteUrl("Vendor", new { SeName = Model.SeName }, webHelper.CurrentRequestProtocol).ToLowerInvariant();
+        Html.AddCanonicalUrlParts(vendorUrl, seoSettings.QueryStringInCanonicalUrlsEnabled);
+    }
+
+    var customer = _customerService.GetAllCustomers(null, null, 0, Model.Id);
+    var customerId = customer.Count > 0 ? customer.FirstOrDefault().Id : 0;
+    var joinDate = customer.Count > 0 ? customer.FirstOrDefault().CreatedOnUtc : DateTime.Now;
+
+    var param = ViewContext.HttpContext.Request.Query["cid"];
+
+    if (!String.IsNullOrEmpty(param))
+    {
+        var cid = Convert.ToInt32(param);
+        if (cid > 0)
+        {
+            IList<int> categoryIds = new List<int>();
+            categoryIds.Add(cid);
+            var products = _productService.SearchProducts(out IList<int> filterableSpecificationAttributeOptionIds,
+                true,
+                vendorId: Model.Id,
+                storeId: 0,
+                categoryIds: categoryIds);
+            Model.Products = _productModelFactory.PrepareProductOverviewModels(products).ToList();
+        }
+    }
+
+}
+
+<div class="page vendor-store-page">
+    <div class="vendor-page-title mb-0">
+        <div class="title-picture-wrapper">
+            <div class="vendor-picture-wrapper">
+                <img src="/Themes/Venture/Content/img/home_agro_section_bg2.jpg" alt="@Model.PictureModel.AlternateText" title="@Model.PictureModel.Title" />
+            </div>
+            <div class="vendor">
+                <div class="logo">
+                    @{
+                        var title = Model.SystemName;
+                        var altText = Model.SystemName;
+                        <img src="/Themes/Venture/Content/img/icons8-user-64.png" alt="@altText" title="@title" />
+                    }
+                </div>
+                <div class="name">
+                    <h2>
+                        <span>@Model.SystemName </span>
+                    </h2>
+                </div>
+                @*contact vendor*@
+                @if (Model.AllowCustomersToContactVendors)
+                {
+                    <div class="contact-vendor" onclick="contactVendor()">
+                        <img src="/Themes/Venture/Content/img/icons8-chat-64.png" alt="Chat with @Model.SystemName">
+                        <span>Chat Now</span>
+                    </div>
+
+                    <script asp-location="Footer">
+                        function contactVendor() {
+                            localStorage.setItem('chatVendorId', `@customerId`);
+                            setLocation('@Url.RouteUrl("ChatMessaging")' + '?cid=' + @Model.Id);
+                        }
+                    </script>
+                }
+                <div class="follow-vendor">
+                    <img src="/Themes/Venture/Content/img/icons8-new-store-80.png" alt="Chat with @Model.SystemName">
+                    <span>Follow</span>
+                </div>
+            </div>
+        </div>
+        @await Component.InvokeAsync("Widget", new { widgetZone = PublicWidgetZones.CategoryDetailsBeforeSubcategories, additionalData = Model })
+
+        @*Vendor Menu*@
+        <div class="sub-category-toggle-select">Store Menu</div>
+        <div class="sub-categories-wrapper">
+
+            <div class="dropdown title has-dropdown-menu">
+                <a href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Product Classification
+                </a>
+
+                <div class="dropdown-menu vc-list-item" aria-labelledby="dropdownMenuLink">
+                    <a href="#" class="dropdown-item" data-cid="0">All</a>
+                    @foreach (var category in Model.Categories)
+                    {
+                        <a href="#" class="dropdown-item" data-cid="@category.Id">@category.Name</a>
+                    }
+                </div>
+            </div>
+            
+            <div class="title">
+                <a href="#" class="v-home" title="@Model.SystemName's Home">
+                    Vendor Home
+                </a>
+            </div>
+            <div class="title">
+                <a href="#" class="v-all-products" title="All products by @Model.SystemName">
+                    All Products
+                </a>
+            </div>
+            <div class="title">
+                <a href="#" class="v-profile" title="@Model.SystemName's Profile">
+                    Profile
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="page-body vendor-products mt-5" style="display: none;">
+        @await Component.InvokeAsync("Widget", new { widgetZone = PublicWidgetZones.VendorDetailsTop, additionalData = Model })
+        @*description*@
+        @*@if (!string.IsNullOrWhiteSpace(Model.Description))
+        {
+            <div class="vendor-description">
+                @Html.Raw(Model.Description)
+            </div>
+        }*@
+
+        @if (Model.Products.Count > 0)
+        {
+            @await Html.PartialAsync("_CatalogSelectors", Model.PagingFilteringContext)
+        }
+        else
+        {
+            <h2 class="store-empty"><span>@Model.SystemName</span>'s Store is Empty!</h2>
+        }
+        @*product list*@
+        @if (Model.Products.Count > 0)
+        {
+            <div class="@(Model.PagingFilteringContext.ViewMode == "list" ? "product-list" : "product-grid")">
+                <div class="item-grid">
+                    @foreach (var product in Model.Products)
+                    {
+                        <div class="item-box">
+                            @await Html.PartialAsync("_ProductBox", product)
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+        @{
+            var pager = Html.Pager(Model.PagingFilteringContext).QueryParam("pagenumber");
+        }
+        @if (!pager.IsEmpty())
+        {
+            <div class="pager">
+                @pager
+            </div>
+        }
+        @await Component.InvokeAsync("Widget", new { widgetZone = PublicWidgetZones.VendorDetailsBottom, additionalData = Model })
+    </div>
+    <div class="page-body vendor-profile mt-3" style="display: none;">
+        <div class="bg-light container">
+            <div class="row">
+                <div class="col p-3">
+                    <h4> Seller Size </h4>
+
+                    <div class="mt-3">
+                        <i class="fas fa-signal fa-2x"></i>
+                    </div>
+                </div>
+                <div class="col p-3">
+                    <h4> Joined </h4>
+
+                    <div class="mt-3">
+                        <div class="media">
+                            <h3 class="align-self-center mr-2">@joinDate.ToString("MMM") </h3>
+                            <div class="media-body">
+                                <h5 class="mt-1">@joinDate.ToString("yyy")</h5>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col p-3">
+                    <h4> Shipped on Time </h4>
+
+                    <div class="mt-3">
+                        <div class="media">
+                            <h3 class="align-self-center mr-2">70% </h3>
+                            <div class="media-body">
+                                <h5 class="mt-1">
+                                    this is average for sellers in same category
+                                </h5>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col p-3">
+                    <h4> Cancellations by Seller </h4>
+
+                    <div class="mt-3">
+                        <div class="media">
+                            <h3 class="align-self-center mr-2"> <i class="fas fa-people-carry fa-2x"></i> </h3>
+                            <div class="media-body">
+                                <h3 class="mt-1">0%</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col p-3">
+                    <h4> Chat </h4>
+
+                    <div class="mt-3">
+                        <h4>Chat Response rate</h4>
+                        <h4 class="text-greenish">100.00%</h4>
+                        <h4 class="mt-2">Chat Response time</h4>
+                        <h4 class="text-greenish">Active in: hours</h4>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script asp-location="Footer">
+
+    function setView() {
+        if (location.hash.includes('profile')) {
+            $('.vendor-profile').show();
+            $('.vendor-products').hide();
+        } else {
+            $('.vendor-profile').hide();
+            $('.vendor-products').show();
+        }
+    }
+
+    $(document).ready(function () {
+
+        setView();
+
+        $('.vc-list-item a').click(function (e) {
+            var cid = $(this).data('cid');
+            window.location = `?cid=${cid}`;
+            e.preventDefault();
+        });
+
+        $('.v-profile').click(function (e) {
+            window.location.hash = '#profile';
+            $('.sub-categories-wrapper a').removeClass('text-greenish');
+            $(this).addClass('text-greenish');
+            setView();
+            e.preventDefault();
+        });
+
+        $('.v-home, .v-all-products').click(function (e) {
+            window.location.hash = '';
+            $('.sub-categories-wrapper a').removeClass('text-greenish');
+            $(this).addClass('text-greenish');
+            setView();
+            e.preventDefault();
+        });
+    });
+</script>

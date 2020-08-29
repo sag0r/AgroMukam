@@ -1,0 +1,56 @@
+﻿@model ProductModel
+@inject Nop.Services.Catalog.ISpecificationAttributeService _specificationAttributeService
+@{
+    var commonAttributes = _specificationAttributeService
+        .GetSpecificationAttributesWithOptions()
+        .Where(x => x.CategoryId == 0);
+
+    var vendorSKUsCommon = commonAttributes.Select(x =>
+    {
+        return new ProductSpecificationAttributeModel
+        {
+            AllowFiltering = true,
+            AttributeId = x.Id,
+            AttributeName = x.Name,
+            ValueRaw = "",
+            ShowOnProductPage = true,
+            SpecificationAttributeOptionId = x.SpecificationAttributeOptions.FirstOrDefault().Id
+        };
+    }).ToList();
+}
+
+<div class="panel-body">
+    <p>
+        @T("Admin.Catalog.Products.SpecificationAttributes.Hint")
+    </p>
+    <div class="form-fields">
+        @foreach (var attr in vendorSKUsCommon)
+        {
+
+            <div class="form-group">
+                <div class="col-md-3">
+                    <div class="label-wrapper">
+                        <label class="control-label" asp-for="@attr.AttributeName">@attr.AttributeName</label>
+                    </div>
+                </div>
+                <div class="col-md-9">
+                    <div class="input-group">
+                        <input class="form-control text-box single-line" asp-for="@attr.AttributeName" value="@attr.ValueRaw" />
+                        <div class="input-group-btn">
+                            <nop-required />
+                        </div>
+                    </div>
+                    <span asp-validation-for="@attr.AttributeName"></span>
+                </div>
+            </div>
+        }
+
+        <span class="ttest">Test</span>
+        <script asp-location="Footer">
+            $('.ttest').on('click', function(){
+                console.log('vendor skus common', `@vendorSKUsCommon`)
+            });
+        </script>
+    </div>
+</div>
+

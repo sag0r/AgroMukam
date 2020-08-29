@@ -1,0 +1,67 @@
+﻿@model ProductModel
+@using Nop.Web.Framework.Controllers;
+@inject Nop.Services.Catalog.ISpecificationAttributeService _specificationAttributeService
+@{
+    var categoryId = this.ViewData["selectedCategoryId"];
+
+    var commonAttributes = _specificationAttributeService.GetSpecificationAttributesWithOptions();
+    var vendorSKUsCommon = commonAttributes.Select(x =>
+    {
+        return new ProductSpecificationAttributeModel
+        {
+            AllowFiltering = true,
+            AttributeId = x.Id,
+            AttributeName = x.Name,
+            ValueRaw = "",
+            ShowOnProductPage = true,
+            SpecificationAttributeOptionId = x.SpecificationAttributeOptions.FirstOrDefault().Id
+        };
+    }).ToList();
+}
+
+<div class="panel-body">
+    <p>
+        @T("Admin.Catalog.Products.SpecificationAttributes.Hint")
+    </p>
+    <h1>cid: @categoryId</h1>
+    <div class="form-fields">
+        @*@foreach (var attr in Model.VendorSKUsCommon)
+        {
+            var controlId = $"{NopAttributePrefixDefaults.Product}{attr.AttributeId}";
+            <div class="form-group">
+                <div class="col-md-3">
+                    <div class="label-wrapper">
+                        <label class="control-label" for="@(controlId)">@attr.AttributeName</label>
+                    </div>
+                </div>
+                <div class="col-md-9">
+                    <div class="input-group">
+                        <input
+                               class="form-control text-box single-line"
+                               name="@(controlId)"
+                               type="text"
+                               id="@(controlId)"
+                               value="@attr.ValueRaw" 
+                               data-val="true"
+                               data-val-length-max="400"
+                               data-val-length-min="0"
+                               data-val-required="@attr.AttributeName is required"
+                        />
+                        <div class="input-group-btn">
+                            <nop-required />
+                        </div>
+                    </div>
+                    <span class="field-validation-error" data-valmsg-for="@(controlId)" data-valmsg-replace="true"><span for="@(controlId)" class=""></span></span>
+                </div>
+            </div>
+        }*@
+
+        <span class="ttest">Test</span>
+        <script asp-location="Footer">
+            $('.ttest').on('click', function(){
+                console.log('common skus category wise', `@vendorSKUsCommon`);
+            });
+        </script>
+    </div>
+</div>
+

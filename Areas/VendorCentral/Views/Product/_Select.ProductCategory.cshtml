@@ -1,0 +1,16 @@
+﻿@model CategoryTreeModel
+<li data-category-id="@Model.Id" data-parent-category-id="@Model.ParentCategoryId">
+    <span> @Model.Text </span>
+@{
+    var subCategories = Model.Items;
+    if (subCategories.Count > 0)
+    {
+        <ul>
+            @foreach (var category in subCategories)
+            {
+                @await Html.PartialAsync("_Select.ProductCategory", category)
+            }
+        </ul>
+    }
+}
+</li>

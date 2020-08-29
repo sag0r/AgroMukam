@@ -1,0 +1,153 @@
+/* === Main Parent of All Menu Structure === */
+.menuShopen.theme-2,
+.menuShopen.theme-2 ul {
+	background-color:#fff;
+	background-color: #fff;
+	box-shadow: 0 0 25px rgba(0,0,0,0.15);
+	height: 100% !important;
+}
+.menuShopen.theme-2 ul {
+	margin-left:0;
+}
+
+/* === Items of Menu === */
+.menuShopen.theme-2 li {
+	border-bottom:0;
+	/*border-right:1px solid rgba(0,0,0,0.05);*/
+}
+
+/* === Links of Menu === */
+.menuShopen.theme-2 a {
+    text-align: left;
+    padding: 10px 40px 10px 10px;
+    text-decoration: none;
+	color: #111;
+	/* 
+	font-size: 14px;
+	line-height: 16px; */
+	text-transform: capitalize;
+}
+.menuShopen.theme-2:not(.menuResp) a:hover,
+.theme-2 .mOpen > a {
+	text-decoration:none;
+}
+.theme-2 .mOpen > a:after {
+	content:'';
+	border:5px solid transparent;
+	border-left:0;
+	border-right-color:#fff;
+	height:0;
+	width:0;
+	font-size:0;
+	line-height:0;
+	position:absolute;
+	right:0;
+	top:50%;
+	margin-top:-5px;
+	margin-right:-1px;
+}
+
+/* === Parent Element for Scrolling === */
+.theme-2 .shopen-content>li:last-child {
+	border-bottom:0;
+}
+
+/* === Element (right arrow) which showing subcategories and manages === */
+.theme-2 .arrow-right {
+	width:30px;
+}
+.theme-2 .arrow-right:after {
+	width:5px;
+	height:5px;
+	border:1px solid #000;
+	border-width:1px 1px 0 0;
+	position:absolute;
+	top:50%;
+	left:50%;
+	margin:-2.5px 0 0 -5px;
+	-webkit-transform:rotate(45deg);
+	-moz-transform:rotate(45deg);
+	-o-transform:rotate(45deg);
+	-ms-transform:rotate(45deg);
+	transform:rotate(45deg);
+}
+.menuShopen.theme-2:not(.menuResp) a:hover .arrow-right:after,
+.theme-2 .mOpen > a .arrow-right:after {
+	border-color: #000;
+}
+.theme-2 .arrow-right:hover {
+	background-color: rgba(0, 0, 0, 0.05) !important;
+	border-left-color: rgba(255, 255, 255, 0) !important;
+}
+.theme-2 .mOpen > a {
+	background: #000;
+	color: #000;
+}
+
+/* === Controls scrolling === */
+.theme-2 .scrollNav:hover {
+	background-color:rgba(0,0,0,0.2);
+}
+.theme-2 .scrollNav:after {
+	border-color: rgba(0,0,0,0.4);
+}
+.theme-2 .scrollNav:hover:after {
+	border-color:#fff;
+}
+
+.menuShopen.theme-2:not(.menuResp) a:hover .arrow-right, 
+.theme-2 .mOpen > a .arrow-right {
+	background-color: rgba(255, 255, 255, 0.05);
+}
+.theme-2 .arrow-right:active {
+	background-color:rgba(0, 0, 0, 0.4) !important;
+}
+
+/* === color of highlighting === */
+.theme-2 .shopen > .shopen-pane > .shopen-slider,
+.menuShopen.theme-2:not(.menuResp) a:hover,
+.theme-2 .mOpen > a {
+	background-color: rgba(254,189,105,.8);
+	color: #000;
+}
+.theme-2 .arrow-right:after {
+	border-color:rgb(96, 125, 139);
+}
+
+@media (max-width: 991px) {
+.theme-2.menuResp .arrow-right,
+.theme-2.menuResp .arrow-right:hover,
+.theme-2.menuResp .arrow-right:active {
+	/*border-right:1px solid rgba(0,0,0,0);*/
+	background-color:inherit !important;
+}
+.theme-2.menuResp.menuShopen a {
+	padding: 14px 10px 14px 40px;
+}
+.theme-2.menuResp.menuShopen a:before {
+	content:'';
+	float:left;
+	margin-right:-100%;
+	width:5px;
+	height:5px;
+	margin-left:-29px;
+	margin-top:5px;
+	border-radius:50%;
+}
+.theme-2.menuResp .mOpen > a > .arrow-right::after {
+    -webkit--webkit-transform: rotate(135deg);
+	-moz-transform: rotate(135deg);
+	-o-transform: rotate(135deg);
+	-ms-transform: rotate(135deg);
+	transform: rotate(135deg);
+    margin: -4px 0 0 -3px;
+}
+.theme-2.menuResp.menuShopen ul a {padding-left:70px;}
+.theme-2.menuResp ul .arrow-right {left:30px}
+.theme-2.menuResp.menuShopen ul ul a {padding-left:100px;}
+.theme-2.menuResp ul ul .arrow-right {left:60px}
+.theme-2.menuResp.menuShopen ul ul ul a {padding-left:130px;}
+.theme-2.menuResp ul ul ul .arrow-right {left:90px}
+.theme-2.menuResp.menuShopen ul ul ul ul a {padding-left:160px;}
+.theme-2.menuResp ul ul ul ul .arrow-right {left:120px}
+}

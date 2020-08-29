@@ -1,0 +1,131 @@
+/* === Main Parent of All Menu Structure === */
+.menuShopen.theme-1,
+.menuShopen.theme-1 ul {
+	background-color:#fff;
+	box-shadow:0 0 0 1px rgba(0, 0, 0, 0.05);
+}
+/* === Items of Menu === */
+.menuShopen.theme-1 li {
+	border-bottom:1px solid #E8E8E8;
+}
+
+/* === Links of Menu === */
+.menuShopen.theme-1 a {
+	font:12px/1.2em Arial, Helvetica, sans-serif;
+	text-align:left;
+	padding: 14px 40px 14px 10px;
+	text-decoration:none;
+	color:#666;
+}
+.menuShopen.theme-1:not(.menuResp) a:hover {
+	background:#000;
+	color:#fff;
+	text-decoration:none;
+}
+
+/* === Parent Element for Scrolling === */
+.theme-1 .shopen-content>li:last-child {
+	border-bottom:0;
+}
+
+/* === Element (right arrow) which showing subcategories and manages === */
+.theme-1 .arrow-right {
+	width:30px;
+}
+.theme-1 .arrow-right:after {
+	width:10px;
+	height:10px;
+	border:1px solid #000;
+	border-width:1px 1px 0 0;
+	position:absolute;
+	top:50%;
+	left:50%;
+	margin:-5px 0 0 -8px;
+	-webkit-transform:rotate(45deg);
+	-moz-transform:rotate(45deg);
+	-o-transform:rotate(45deg);
+	-ms-transform:rotate(45deg);
+	transform:rotate(45deg);
+}
+.menuShopen.theme-1:not(.menuResp) a:hover .arrow-right:after, 
+.theme-1 .mOpen > a .arrow-right:after {
+	border-color:#fff;
+}
+.theme-1 .arrow-right:hover {
+	background-color: rgba(0, 0, 0, 0.05) !important;
+	border-left-color: rgba(255, 255, 255, 0) !important;
+}
+.theme-1 .mOpen > a {
+	background:#000;
+	color:#fff;
+}
+
+/* === Controls scrolling === */
+.theme-1 .scrollNav:hover {
+	background-color:rgba(0,0,0,0.2);
+}
+.theme-1 .scrollNav:after {
+	border-color: rgba(0,0,0,0.4);
+}
+.theme-1 .scrollNav:hover:after {
+	border-color:#fff;
+}
+
+.menuShopen.theme-1:not(.menuResp) a:hover .arrow-right, 
+.theme-1 .mOpen > a .arrow-right {
+	background-color: rgba(255, 255, 255, 0.05);
+}
+.theme-1 .arrow-right:active {
+	background-color:rgba(0, 0, 0, 0.2) !important;
+}
+/* === color of highlighting === */
+.theme-1 .shopen > .shopen-pane > .shopen-slider, 
+.menuShopen.theme-1:not(.menuResp) a:hover, 
+.theme-1 .mOpen > a {
+	background-color:rgb(96, 125, 139);
+	color:rgb(255, 255, 255);
+}
+.theme-1 .arrow-right:after {
+	border-color:rgb(96, 125, 139);
+}
+.menuResp.menuShopen a:before {
+	background-color:rgb(96, 125, 139);
+	opacity:0.5;
+}
+@media (max-width: 991px) {
+.theme-1.menuResp .arrow-right,
+.theme-1.menuResp .arrow-right:hover,
+.theme-1.menuResp .arrow-right:active {
+	border-right:1px solid rgba(0,0,0,0.05);
+	background-color:inherit !important;
+}
+.theme-1.menuResp.menuShopen a {
+	padding: 14px 10px 14px 40px;
+}
+.theme-1.menuResp.menuShopen a:before {
+	content:'';
+	float:left;
+	margin-right:-100%;
+	width:5px;
+	height:5px;
+	margin-left:-27px;
+	margin-top:5px;
+	border-radius:50%;
+}
+.theme-1.menuResp .mOpen > a > .arrow-right::after {
+    -webkit--webkit-transform: rotate(135deg);
+	-moz-transform: rotate(135deg);
+	-o-transform: rotate(135deg);
+	-ms-transform: rotate(135deg);
+	transform: rotate(135deg);
+    margin: -7px 0 0 -5px;
+}
+.theme-1.menuResp.menuShopen ul a {padding-left:70px;}
+.theme-1.menuResp ul .arrow-right {left:30px}
+.theme-1.menuResp.menuShopen ul ul a {padding-left:100px;}
+.theme-1.menuResp ul ul .arrow-right {left:60px}
+.theme-1.menuResp.menuShopen ul ul ul a {padding-left:130px;}
+.theme-1.menuResp ul ul ul .arrow-right {left:90px}
+.theme-1.menuResp.menuShopen ul ul ul ul a {padding-left:160px;}
+.theme-1.menuResp ul ul ul ul .arrow-right {left:120px}
+}

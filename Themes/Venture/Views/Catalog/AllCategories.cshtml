@@ -1,0 +1,221 @@
+﻿@model TopMenuModel
+
+@{
+    Layout = "_ColumnsOne";
+
+    //title
+    Html.AddTitleParts("All Categories");
+    //page class
+    Html.AppendPageCssClassParts("html-all-categories-page");
+
+    Model.Categories = Model.Categories
+        .Where(x => x.IncludeInTopMenu
+            && !x.Name.Contains("Service")
+            && !x.Name.Contains("Courier"))
+        .ToList();
+    Html.AddCssFileParts("~/lib/jquery-ui/jquery-ui-1.12.1.custom/jquery-ui.min.css");
+}
+
+<style>
+    .ui-tabs-vertical {
+        width: 55em;
+    }
+
+        .ui-tabs-vertical .ui-tabs-nav {
+            padding: .2em .1em .2em .2em;
+            float: left;
+            border: 0;
+        }
+
+            .ui-tabs-vertical .ui-tabs-nav li {
+                clear: left;
+                width: 100%;
+                border-color: #ddd;
+                background: #eee;
+                margin: 0 -1px .2em 0;
+            }
+
+                .ui-tabs-vertical .ui-tabs-nav li a {
+                    display: block;
+                }
+
+                .ui-tabs-vertical .ui-tabs-nav li.ui-tabs-active {
+                    padding-bottom: 0;
+                    padding-right: .1em;
+                    border: 0;
+                }
+
+        .ui-tabs-vertical .ui-tabs-panel {
+            padding: 1em;
+            float: right;
+            width: 40em;
+        }
+
+    .ui-tabs-anchor::before {
+        background: none !important;
+    }
+
+    .ui-tabs-vertical .ui-tabs-nav li.ui-tabs-active a {
+        background: white;
+    }
+
+    .tab-nav-items {
+        width: 90px !important;
+    }
+
+    @@media all and (max-width: 768px) {
+        .tab-nav-items {
+            width: 90px !important;
+        }
+    }
+
+    .navbar-brand span {
+        font-size: 14px !important;
+        font-weight: 400;
+    }
+
+    .h-line hr {
+        border: 0;
+        height: 1px;
+        background: #eee;
+    }
+
+    .ui-tabs .ui-tabs-nav li {
+        white-space: inherit !important;
+    }
+</style>
+
+<div class="w-100">
+
+    <nav class="navbar navbar-light bg-greenish navbar-expand shadow-sm fixed-top">
+        <a class="navbar-brand text-white" href="/">
+            <i class="fas fa-long-arrow-left"></i>
+            <span class="pl-2"> Just for You </span>
+        </a>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item pl-2 pr-2">
+                    <a class="nav-link text-white" href="@Url.RouteUrl("ShoppingCart")">
+                        <i class="fas fa-shopping-cart"></i>
+                    </a>
+                </li>
+                <li class="nav-item pl-2 pr-2">
+                    <a class="nav-link text-white" href="@Url.RouteUrl("CustomerInfo")">
+                        <i class="fas fa-user"></i>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <div id="tabs" class="row pt-5" style="width: initial;">
+        <ul class="tab-nav-items">
+            <li>
+                <a href="#tabs-00" class="w-100">
+                    <img src="/Themes/Venture/Content/images/category-icons/just-for-you.png" class="d-block m-auto" style="width: 28px;" />
+                    <span class="d-block text-center mt-1" style="font-size: 12px; font-weight: 400;">
+                        Just for You
+                    </span>
+                </a>
+            </li>
+
+            @foreach (var category in Model.Categories)
+            {
+                var imgSrc = "/Themes/Venture/Content/images/category-icons/" + category.SeName + "-colorful.png";
+
+                <li>
+                    <a href="#tabs-@category.Id" class="w-100">
+                        <img src="@imgSrc" alt="@category.Name" class="d-block m-auto" style="width: 28px;" />
+                        <span class="d-block text-center mt-1" style="font-size: 12px; font-weight: 400;">
+                            @category.Name
+                        </span>
+                    </a>
+                </li>
+            }
+        </ul>
+        <div class="col p-0 bg-white">
+
+            <div id="tabs-00" class="w-100 h-100 pt-2 pr-4 pl-2">
+
+                @{
+                    var randomCategories = new List<CategorySimpleModel>();
+
+                    foreach (var category in Model.Categories)
+                    {
+                        if (category.HaveSubCategories)
+                        {
+                            foreach (var subcategory in category.SubCategories)
+                            {
+                                randomCategories.Add(subcategory);
+                            }
+                        }
+                    }
+
+                    <div class="row">
+                        @{
+                            randomCategories = randomCategories.Take(15).ToList();
+                            foreach (var category in randomCategories)
+                            {
+                                <div class="col-4">
+                                    <img src="@category.PictureModel.ImageUrl"
+                                         class="d-block img-fluid m-auto"
+                                         style="height: 60px; width: 100px;" />
+                                    <span class="d-block text-center mt-2"> @category.Name </span>
+                                </div>
+                            }
+
+                        }
+                    </div>
+
+
+                }
+
+            </div>
+
+            @foreach (var category in Model.Categories)
+            {
+                <div id="tabs-@category.Id" class="w-100 h-100 pt-2 pr-4 pl-2">
+                    @*<h2>@category.Name</h2>*@
+                    <img src="@category.PictureModel.ImageUrl" style="max-height: 120px; width: 100%;" />
+                    @if (category.HaveSubCategories)
+                    {
+                        @await Html.PartialAsync("_Subcategories", category.SubCategories)
+                    }
+
+                </div>
+            }
+        </div>
+    </div>
+</div>
+<script asp-location="Footer">
+    $(function () {
+
+        $("#tabs")
+            .tabs({
+                activate: function (event, ui) {
+                    $('.navbar-brand span').text(ui.newTab[0].textContent.trim());
+                }
+            })
+            .addClass("ui-tabs-vertical ui-helper-clearfix");
+
+
+      $("#tabs li").removeClass("ui-corner-top").addClass("ui-corner-left");
+        //$('.subcategory-ul').sliderMenu();
+
+        $('<div class="col-12 mt-3 mb-3 h-line"> <hr /> <div>')
+            .insertAfter('.ui-tabs-panel .row div:nth-child(3n+3)');
+
+        var icons = {
+            header: "ui-icon-circle-arrow-e",
+            activeHeader: "ui-icon-circle-arrow-s"
+        };
+        $(".accordion").accordion({
+            collapsible: true,
+            heightStyle: 'content',
+            active: false
+        });
+
+      console.log('m-model', JSON.parse(`@Json.Serialize(Model)`));
+
+  } );
+</script>

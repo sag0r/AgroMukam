@@ -1,0 +1,301 @@
+@model ShoppingCartModel
+@using Nop.Core
+@using Nop.Core.Domain.Orders
+@using Nop.Core.Domain.Tax
+
+@inject IWebHelper webHelper
+@inject IWorkContext workContext
+@inject OrderSettings orderSettings
+@inject IViewComponentSelector viewComponentSelector
+
+<div class="order-summary-content">
+   @await Component.InvokeAsync("Widget", new { widgetZone = PublicWidgetZones.OrderSummaryContentBefore })
+   @await Html.PartialAsync("_OrderReviewData", Model.OrderReviewData)
+   @if (Model.Items.Count > 0)
+   {
+       var vendorWiseItems = Model.Items.GroupBy(x => x.VendorName).ToList();
+
+       if (Model.Warnings.Count > 0)
+       {
+       <div class="message-error">
+           <ul>
+               @foreach (var warning in Model.Warnings)
+               {
+                   <li>@warning</li>
+               }
+           </ul>
+       </div>
+       }
+       @*we add enctype = "multipart/form-data" because "File upload" attribute control type requires it*@
+       <form asp-route="ShoppingCart" method="post" enctype="multipart/form-data" id="shopping-cart-form">
+            <div class="row">
+                <div class="col-12 col-md-8">
+
+                    @* Delivery Options *@
+                    <div class="w-100 preferred-delivery-option">
+                        <div class="card border-0 rounded-0">
+                            <div class="card-body">
+                                <h3> @T("ShoppingCart.DeliveryOptions.PreferredDeliveryOption") </h3>
+
+                                <div class="delivery-options row mt-3">
+                                    <div class="col-12 col-sm-6 col-md-4">
+                                        <div class="d-option border cursor-pointer border-success active">
+                                            <div class="media font-latop-2">
+                                                <i class="fas fa-check text-success align-self-center ml-2 mr-3"></i>
+                                                <div class="media-body">
+                                                    <h4 class="mt-0" style="font-weight: bold;">
+                                                        <i class="fas fa-truck-loading mr-2"></i>
+                                                        @T("ShoppingCart.DeliveryOptions.Standard")
+                                                    </h4>
+                                                    @{
+                                                        var fourthDay = DateTime.Now.AddDays(4);
+                                                        var eighthDay = DateTime.Now.AddDays(8);
+                                                        var sameMonth = fourthDay.ToString("MMMM") == eighthDay.ToString("MMMM");
+                                                    }
+                                                <p class="mt-2 mb-2" style="font-size: 14px;">
+                                                    @T("ShoppingCart.DeliveryOptions.EstimatedDeliveryBy")
+                                                    @fourthDay.Day
+                                                    @(sameMonth ? "" : fourthDay.ToString("MMMM"))
+                                                    - @eighthDay.Day @eighthDay.ToString("MMMM")
+                                                    @eighthDay.Year
+                                                </p>
+                                                    @{
+                                                        var deliveryCharge = 55 * vendorWiseItems.Count;
+                                                    }
+                                                    <input type="hidden" value="@deliveryCharge" id="deliveryCharge">
+                                                    <h4 class="mb-0" style="font-weight: bold;"> @deliveryCharge Tk.</h4>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    @*  *@
+                    <div class="card border-0 rounded-0 mt-3">
+                        <div class="card-header border-0">
+                            <div class="row">
+                                <div class="col-auto pt-1">
+                                    <div class="inputs mb-0" style="width: auto;">
+                                        <ul class="option-list">
+                                            <li>
+                                                <input id="selectAll" type="checkbox" name="selectAll" value="selectAll" />
+                                                <label for="selectAll">@T("ShoppingCart.Products.SelectAll")</label>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+
+                                <div class="col-auto" style="color: #909090; text-transform: capitalize;">
+                                    <button name="updatecart" class="btn btn-light btn-sm text-muted">
+                                        <i class="far fa-trash-alt mr-2"></i>
+                                        @T("ShoppingCart.Products.Delete")
+                                    </button>
+                                </div>
+                                @*<div class="col-auto" style="color: #909090; text-transform: capitalize;">
+                                    <button name="updatecart" class="btn btn-light btn-sm text-muted">
+                                        <i class="far fa-sync-alt mr-2"></i>
+                                        @T("ShoppingCart.UpdateCart")
+                                    </button>
+                                </div>*@
+                                <div class="col pt-1 text-center" style="color: #909090; text-transform: capitalize;">
+                                    @T("ShoppingCart.Price")
+                                </div>
+                                <div class="col pt-1 text-right" style="color: #909090; text-transform: capitalize;">
+                                    @T("ShoppingCart.Quantity")
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    @* Cart Items *@
+                    @{
+                        foreach (var vendorWiseItem in vendorWiseItems)
+                        {
+                            <div class="card cart border-0 rounded-0 mt-3">
+                                <div class="card-header bg-white">
+                                    @vendorWiseItem.FirstOrDefault().VendorName
+                                </div>
+
+                                <div class="card-body">
+                                    @foreach (var item in vendorWiseItem.ToList())
+                                    {
+                                    <div class="row border-bottom pb-3 mb-3">
+                                        <div class="col-auto">
+                                            <input type="checkbox" name="removefromcart" id="removechackbox-@(item.Id)" value="@(item.Id)" />
+                                            <label for="removechackbox-@(item.Id)" class="td-title"></label>
+                                        </div>
+
+                                        <div class="col-auto">
+                                            <a href="@Url.RouteUrl("Product", new {SeName = item.ProductSeName})">
+                                                <img alt="@item.Picture.AlternateText"
+                                                     src="@item.Picture.ImageUrl"
+                                                     title="@item.Picture.Title"
+                                                     style="max-width: 75px;"
+                                                />
+                                            </a>
+                                        </div>
+
+                                        <div class="col-5">
+                                            <h4 class="font-weight-bold">
+                                                <a href="@Url.RouteUrl("Product", new { SeName = item.ProductSeName })" class="product-name">
+                                                    @item.ProductName
+                                                </a>
+                                            </h4>
+                                            @if (!String.IsNullOrEmpty(item.AttributeInfo))
+                                            {
+                                                <div class="attributes">
+                                                    @Html.Raw(item.AttributeInfo)
+                                                </div>
+                                            }
+
+                                            @if (item.Warnings.Count > 0)
+                                            {
+                                                <div class="message-error">
+                                                    <ul>
+                                                        @foreach (var warning in item.Warnings)
+                                                        {
+                                                            <li>@Html.Raw(warning)</li>
+                                                        }
+                                                    </ul>
+                                                </div>
+                                            }
+                                        </div>
+
+                                        <div class="col text-center">
+
+                                            @* Unit Price *@
+                                            <h3 class="font-weight-bold text-greenish"> @item.UnitPrice </h3>
+
+                                            @* Old Price *@
+                                            @if (!String.IsNullOrEmpty(item.OldPrice))
+                                            {
+                                                <h4 class="text-muted text-line-through"> @item.OldPrice </h4>
+                                            }
+
+                                            @* Discount Percentage *@
+                                            @if (!String.IsNullOrEmpty(item.Discount))
+                                            {
+                                                <h4> -@item.Discount </h4>
+                                            }
+
+                                        </div>
+
+                                        <div class="col-auto">
+                                            <div class="input-group">
+                                                <div class="input-group-prepend">
+                                                    <button class="btn btn-outline-secondary qty-decrease"
+                                                            type="button"> - </button>
+                                                </div>
+                                                <input name="itemquantity@(item.Id)"
+                                                       id="itemquantity@(item.Id)"
+                                                       type="text"
+                                                       value="@(item.Quantity)"
+                                                       class="qty-input" />
+                                                <div class="input-group-append">
+                                                    <button class="btn btn-outline-secondary qty-increase"
+                                                            type="button"> + </button>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    }
+
+
+
+
+                </div>
+
+                <div class="col-12 col-md-4">
+                    <div class="card border-0 rounded-0">
+                        <div class="card-body">
+                            <h3> @T("ShoppingCart.OrderSummary") </h3>
+                            @await Component.InvokeAsync("OrderTotals", new { isEditable = Model.IsEditable })
+                            <button type="submit" id="checkout" name="checkout" value="checkout" class="btn btn-success bg-greenish btn-block">
+                                @T("Checkout.Button")
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+       </form>
+   }
+   else
+   {
+       <div class="no-data">
+           @T("ShoppingCart.CartIsEmpty")
+       </div>
+   }
+   @await Component.InvokeAsync("Widget", new { widgetZone = PublicWidgetZones.OrderSummaryContentAfter })
+</div>
+
+
+<script asp-location="Footer">
+    $(document).ready(function () {
+
+        // All products need to be pre-selected in the cart
+        $('input[name="removefromcart"]').prop('checked', true);
+
+        $('#selectAll').click(function () {
+            $('input[name="removefromcart"]').prop('checked', this.checked);
+        });
+
+        $('.qty-input').each(function () {
+            if (!($(this).val() > 1)) {
+                $(this).prev()
+                    .find('button').attr('disabled', true);
+            }
+        });
+
+        $('.qty-increase').click(function () {
+            var inp = $(this).parent().prev();
+            var curr = inp.val();
+            curr = parseInt(curr) + 1;
+            inp.val(curr);
+
+            if (curr > 1) {
+                $(this).parent()
+                    .prev().prev()
+                    .find('button').removeAttr('disabled');
+            }
+
+        });
+
+        $('.qty-decrease').click(function () {
+            var inp = $(this).parent().next();
+            var curr = inp.val();
+            curr = parseInt(curr) - 1;
+
+            if (curr < 1) {
+                return false;
+            }
+
+            inp.val(curr);
+
+            if (curr == 1) {
+                $(this).parent()
+                    .prev().prev()
+                    .find('button').attr('disabled', true);
+            }
+
+        });
+
+        // shipping charge
+        // .replace(/\d*[.]?\d*/g,'')
+        var subTotalEl = $('.order-subtotal .cart-total-right span');
+        var subTotal = subTotalEl.text().replace(/[^\d.-]/g, '');
+        var sign = subTotalEl.text().replace(/\d*[.]?\d*/g, '');
+        var charge = $('#deliveryCharge').val();
+        var sTotal = parseInt(subTotal) + parseInt(charge);
+        $('.shipping-cost .cart-total-right span').text(parseFloat(charge + sign).toFixed(2) + sign);
+        $('.order-total .cart-total-right span').text(parseFloat(sTotal).toFixed(2) + sign);
+    });
+</script>

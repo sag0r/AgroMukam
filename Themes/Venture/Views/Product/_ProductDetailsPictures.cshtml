@@ -1,0 +1,82 @@
+﻿@model ProductDetailsModel
+@{
+    //Html.AddScriptParts(ResourceLocation.Footer, "~/Themes/RootTheme/Content/image-gallery/scripts/main.js");
+    @*<link href=/Plugins/SevenSpikes.Nop.Plugins.CloudZoom/Styles/carousel/slick-slider-1.6.0.css rel=stylesheet>*@
+
+Html.AddScriptParts(ResourceLocation.Footer, "/Plugins/SevenSpikes.Nop.Plugins.CloudZoom/Scripts/carousel/slick-slider-1.6.0.min.js");
+    Html.AddScriptParts(ResourceLocation.Footer, "~/Themes/Venture/Content/scripts/xzoom.js");
+    Html.AddCssFileParts("~/Themes/Venture/Content/css/xzoom.css");
+    Html.AddCssFileParts("~/Plugins/SevenSpikes.Nop.Plugins.CloudZoom/Styles/carousel/slick-slider-1.6.0.css");
+}
+
+<div class="image-gallery w-100">
+    @await Component.InvokeAsync("Widget", new { widgetZone = PublicWidgetZones.ProductDetailsBeforePictures, additionalData = Model })
+
+    <img class="xzoom" src="@Model.DefaultPictureModel.ImageUrl" xoriginal="@Model.DefaultPictureModel.ImageUrl" />
+
+    <div class="xzoom-thumbs">
+        @if (Model.PictureModels.Count > 1)
+        {
+            @foreach (var picture in Model.PictureModels)
+            {
+                <a href="@picture.ImageUrl">
+                    <img class="xzoom-gallery" width="80" src="@picture.FullSizeImageUrl">
+                </a>
+            }
+        }
+    </div>
+
+
+    @*<div class="show" href="@Model.DefaultPictureModel.ImageUrl">
+            <img alt="@Model.DefaultPictureModel.AlternateText" src="@Model.DefaultPictureModel.ImageUrl" title="@Model.DefaultPictureModel.Title" itemprop="image" id="show-img" />
+        </div>
+        <div class="small-img">
+            <img src="/Themes/RootTheme/Content/image-gallery/images/online_icon_right@2x.png" class="icon-left" alt="" id="prev-img">
+            <div class="small-container">
+                <div id="small-img-roll">
+                    @if (Model.PictureModels.Count > 1)
+                    {
+                        @foreach (var picture in Model.PictureModels)
+                        {
+                                <img src="@picture.FullSizeImageUrl" alt="@picture.AlternateText" title="@picture.Title" data-defaultsize="@picture.ImageUrl" data-fullsize="@picture.FullSizeImageUrl" class="show-small-img" />
+                        }
+                    }
+                </div>
+            </div>
+            <img src="/Themes/RootTheme/Content/image-gallery/images/online_icon_right@2x.png" class="icon-right" alt="" id="next-img">
+        </div>*@
+</div>
+
+<script asp-location="Footer" src="/Themes/Venture/Content/scripts/xzoom-setup.js"></script>
+<script asp-location="Footer">
+    $(document).ready(function () {
+        $('.xzoom-thumbs').slick({
+            infinite: true,
+            slidesToShow: 4,
+            slidesToScroll: 3,
+            prevArrow: '<i class="fas fa-chevron-left slider-arrow-prev">',
+            nextArrow: '<i class="fas fa-chevron-right slider-arrow-next">',
+        });
+    });
+</script>
+
+<style>
+    .show > div:last-child {
+        z-index: 99;
+    }
+    .slider-arrow-prev,
+    .slider-arrow-next {
+        position: absolute;
+        top: 35%;
+    }
+    .slider-arrow-prev {
+        left: 0;
+    }
+    .slider-arrow-next {
+        right: 0;
+    }
+
+    .slick-list {
+        left: 1%;
+    }
+</style>

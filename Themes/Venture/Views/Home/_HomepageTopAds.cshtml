@@ -1,0 +1,43 @@
+﻿@using Nop.Core
+@using Nop.Core.Domain.Advertisements
+@using Nop.Services.Advertisements
+@using Nop.Services.Media
+@inject IAdvertisementService _advertisementService
+@inject IPictureService _pictureService
+
+@{
+    Html.AddScriptParts(ResourceLocation.Footer, "/Plugins/SevenSpikes.Nop.Plugins.CloudZoom/Scripts/carousel/slick-slider-1.6.0.min.js");
+    Html.AddCssFileParts("~/Plugins/SevenSpikes.Nop.Plugins.CloudZoom/Styles/carousel/slick-slider-1.6.0.css");
+}
+
+@{
+    IPagedList<Advertisement> advertisements = _advertisementService.GetAllAdvertisements(null, 0, 10, 0, null, null, 0, 6);
+    var ads = advertisements.Where(x =>
+    {
+        return x.EndDateUtc > DateTime.Now;
+    }).Take(6).ToList();
+}
+
+@if (ads.Count > 0)
+{
+    <div class="slick-s">
+        @foreach (var ad in ads)
+        {
+            var imgUrl = _pictureService.GetPictureUrl(ad.PictureId);
+            <div>
+                <a href="@ad.HyperLink">
+                    <img src="@imgUrl" class="w-100" style="max-height: 420px;">
+                </a>
+            </div>
+        }
+    </div>
+
+    <script asp-location="Footer">
+        $(document).ready(function () {
+            $('.slick-s').slick({
+                arrows: false,
+                autoplay: true
+            });
+        });
+    </script>
+}

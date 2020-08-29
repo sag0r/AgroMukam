@@ -1,0 +1,23 @@
+﻿@model CategoryNavigationModel.CategoryLineModel
+
+<li>
+    <a href="@Url.RouteUrl("Category", new { SeName = Model.Category.SeName })">
+        @Model.Category.Name
+    </a>
+    @{
+        if (Model.Category.SubCategories.Count > 0)
+        {
+            <ul class="list sub-list">
+                @foreach (var subCategory in Model.Category.SubCategories)
+                {
+                    var categoryLineModel = new CategoryNavigationModel.CategoryLineModel
+                    {
+                        CurrentCategoryId = Model.CurrentCategoryId,
+                        Category = subCategory
+                    };
+                    @await Html.PartialAsync("_AllCategories.Navigation", categoryLineModel)
+                }
+            </ul>
+        }
+    }
+</li>

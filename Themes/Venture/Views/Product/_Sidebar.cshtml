@@ -1,0 +1,484 @@
+﻿@model IList<ProductSpecificationModel>
+@using Nop.Core.Domain.Catalog;
+
+    <div class="product-details-sidebar-content" style="padding: 15px 10px; background: #fafafa;">
+
+        <div class="grid">
+            <div class="g-header">
+                <span>@T("ProductDetails.Sidebar.DeliveryOptions")</span>
+                <span><i class="far fa-info-circle"></i></span>
+            </div>
+            <div class="g-content">
+                <span class="gc-icon">
+                    <i class="far fa-map-marker-alt mr-2"></i>
+                </span>
+                <span class="gc-hint">
+                    <span>@T("ProductDetails.Sidebar.Location")</span>
+                </span>
+                <span class="gc-ext change-location ">
+                    @T("ProductDetails.Sidebar.Change")
+                </span>
+
+                <div class="area-selector shadow" style="display: none;">
+                    <div class="w-100 pt-2">
+                        <div class="text-muted hint p-2">
+                            <span>@T("ProductDetails.Sidebar.Select")</span>
+                        </div>
+
+                        <div class="list-filter pt-2 pb-2 pl-3 pr-3">
+                            <div class="form-group m-0">
+                                <div class="input-group">
+                                    <input type="text"
+                                           class="form-control border-right-0"
+                                           onkeyup="filterList(event)">
+                                </div>
+                            </div>
+                        </div>
+
+                        <ul class="list-group list-group-flush"></ul>
+                    </div>
+                </div>
+            </div>
+            <div class="g-content"">
+                <span class="gc-icon">
+                    <i class="far fa-truck-loading mr-3 mt-2"></i>
+                </span>
+                <span class="gc-hint">
+                    <span>@T("ProductDetails.Sidebar.HomeDelivery")</span>
+                    <span class="text-muted">@T("ProductDetails.Sidebar.OneToFiveDays")</span>
+                </span>
+                <span class="gc-ext">
+                    ৳৫৫
+                </span>
+            </div>
+            <div class="g-content"">
+                <span class="gc-icon">
+                    <i class="far fa-hand-holding-usd mr-3 mt-2"></i>
+                </span>
+                <span class="gc-hint">
+                    <span>@T("ProductDetails.Sidebar.CashOnDelivery")</span>
+                    <span class="text-muted">@T("ProductDetails.Sidebar.Available")</span>
+                </span>
+            </div>
+        </div>
+        <div class="grid">
+            <div class="g-header">
+                <span>@T("ProductDetails.Sidebar.ReturnAndWarranty")</span>
+                <span><i class="far fa-cogs"></i></span>
+            </div>
+            <div class="g-content"">
+                <span class="gc-icon">
+                    <i class="far fa-undo-alt mr-3 mt-2"></i>
+                </span>
+                <span class="gc-hint">
+                    <span>@T("ProductDetails.Sidebar.SevenDaysReturn")</span>
+                    <span class="text-muted">@T("ProductDetails.Sidebar.ChangeOfMindIsNotAcceptable")</span>
+                </span>
+            </div>
+            <div class="g-content"">
+                <span class="gc-icon">
+                    <i class="far fa-shield-alt mr-3 mt-2"></i>
+                </span>
+                <span class="gc-hint">
+                    <span>@T("ProductDetails.Sidebar.Warranty")</span>
+                    <span class="text-muted">@T("ProductDetails.Sidebar.NotAvailable")</span>
+                </span>
+            </div>
+        </div>
+
+    </div>
+<style>
+    .grid>.g-content:last-child {
+    border-bottom: 1px solid #eee;
+    margin-bottom: 10px;
+    padding-bottom: 15px;
+}
+    .grid > div {
+        display: inline-block;
+        width: 100%;
+    }
+    .g-header > span {
+        display: inline-block;
+        float: left;
+        font-size: 12px;
+        opacity: .7;
+    }
+    .g-header > span ~ span {
+        float: right;
+    }
+    .g-content:not(.area-selector) > span {
+        display: inline-block;
+        float: left;
+    }
+    .gc-ext {
+        float: right !important;
+    }
+    .gc-icon {
+            padding-right: 8px;
+    font-size: 30px;
+    width: 50px;
+    }
+    .gc-hint > span {
+    width: 100%;
+}
+    .gc-hint > span ~ span {
+    font-size: 12px;
+    opacity: .6;
+        display: block;
+    margin-top: 5px;
+}
+    .g-content {
+    padding: 10px;
+}
+    .g-header {
+        padding: 5px 10px 0;
+    }
+    .area-selector {
+        position: absolute;
+    top: 35px;
+    right: 0;
+    background: #fff;
+    height: 475px;
+    width: 100%;
+    overflow-x: hidden;
+    z-index: 2;
+    box-shadow: 0 .125rem .25rem rgba(0,0,0,.075) !important;
+    }
+
+    .list-group {
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  padding-left: 0;
+  margin-bottom: 0;
+}
+
+    .list-group-flush .list-group-item {
+  border-right-width: 0;
+  border-left-width: 0;
+  border-radius: 0;
+}
+
+.list-group-flush .list-group-item:first-child {
+  border-top-width: 0;
+}
+
+    .list-group-flush:last-child .list-group-item:last-child {
+        border-bottom-width: 0;
+    }
+
+  .list-group-item-action {
+  width: 100%;
+  color: #495057;
+  text-align: inherit;
+}
+
+.list-group-item-action:hover, .list-group-item-action:focus {
+  z-index: 1;
+  color: #495057;
+  text-decoration: none;
+  background-color: #f8f9fa;
+}
+
+.list-group-item-action:active {
+  color: #212529;
+  background-color: #e9ecef;
+}
+
+.list-group-item {
+  position: relative;
+  display: block;
+  padding: 0.75rem 1.25rem;
+  background-color: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.125);
+}
+
+.list-group-item:first-child {
+  border-top-left-radius: 0.25rem;
+  border-top-right-radius: 0.25rem;
+}
+
+.list-group-item:last-child {
+  border-bottom-right-radius: 0.25rem;
+  border-bottom-left-radius: 0.25rem;
+}
+
+.list-group-item.disabled, .list-group-item:disabled {
+  color: #6c757d;
+  pointer-events: none;
+  background-color: #fff;
+}
+
+.list-group-item.active {
+  z-index: 2;
+  color: #fff;
+  background-color: #007bff;
+  border-color: #007bff;
+}
+
+.list-group-item + .list-group-item {
+  border-top-width: 0;
+}
+
+.list-group-item + .list-group-item.active {
+  margin-top: -1px;
+  border-top-width: 1px;
+}
+
+.list-filter input {
+    width: 100%;
+    margin: 8px auto 12px;
+}
+.area-selector .w-100 {
+    width: 100%;
+
+padding: 10px;
+}
+.area-selector span {
+    font-size: 12px;
+    opacity: .7;
+}
+
+
+</style>
+
+@{
+    //Html.AppendScriptParts(ResourceLocation.Footer, "~/Themes/RootTheme/Content/js/custom.js");
+
+    <script asp-location="Footer" src="/Themes/Venture/Content/scripts/divisions.js"></script>
+    <script asp-location="Footer" src="/Themes/Venture/Content/scripts/districts.js"></script>
+    <script asp-location="Footer" src="/Themes/Venture/Content/scripts/upazillas.js"></script>
+    <script asp-location="Footer" src="/Themes/Venture/Content/scripts/unions.js"></script>
+    <script asp-location="Footer">
+
+        
+        var lngKey = $('html').attr('lang');
+        var localizedProp = lngKey == 'bn' ? 'bn_name' : 'name';
+
+        var selectedArea = {
+            division: { id: 0, name: '', localizedName: '' },
+            district: { id: 0, name: '', localizedName: '' },
+            upazilla: { id: 0, name: '', localizedName: '' },
+            union: { id: 0, name: '', localizedName: '' }
+        };
+
+        function resetSelectedArea() {
+            selectedArea = {
+                division: { id: 0, name: '', localizedName: '' },
+                district: { id: 0, name: '', localizedName: '' },
+                upazilla: { id: 0, name: '', localizedName: '' },
+                union: { id: 0, name: '', localizedName: '' }
+            }
+        }
+
+        function setHInt() {
+            var select = `Division`;
+            var text = '';
+
+            if (selectedArea.division.id > 0) {
+                text += `<span
+                                    class="hint-text text-primary"
+                                    data-id="${selectedArea.division.id}"
+                                    data-type="division"
+                                    data-name="${selectedArea.division.name}"
+                                    data-localizedname="${selectedArea.division[localizedProp]}"
+                                >
+                                ${selectedArea.division.localizedName}
+                            </span>`;
+                select = `District`;
+            }
+            if (selectedArea.district.id > 0) {
+                text += `<i class="fa fa-chevron-right ml-1 mr-1"></i><span
+                                    class="hint-text text-primary"
+                                    data-id="${selectedArea.district.id}"
+                                    data-type="district"
+                                    data-name="${selectedArea.district.name}"
+                                    data-localizedname="${selectedArea.district[localizedProp]}"
+                                >
+                                ${selectedArea.district.localizedName}
+                            </span>`;
+                select = `Upazilla`;
+            }
+            if (selectedArea.upazilla.id > 0) {
+                text += `<i class="fa fa-chevron-right ml-1 mr-1"></i><span
+                                    class="hint-text text-primary"
+                                    data-id="${selectedArea.upazilla.id}"
+                                    data-type="upazilla"
+                                    data-name="${selectedArea.upazilla.name}"
+                                    data-localizedname="${selectedArea.upazilla[localizedProp]}"
+                                >
+                                ${selectedArea.upazilla.localizedName}
+                            </span>`;
+                select = `Union`;
+            }
+            if (selectedArea.union.id > 0) {
+                text += `<i class="fa fa-chevron-right ml-1 mr-1"></i><span
+                                    class="hint-text text-primary"
+                                    data-id="${selectedArea.union.id}"
+                                    data-type="union"
+                                    data-name="${selectedArea.union.name}"
+                                    data-localizedname="${selectedArea.union[localizedProp]}"
+                                >
+                                ${selectedArea.union.localizedName}
+                            </span>`;
+            }
+
+            var t = `${text} ${text != '' ? '<i class="fa fa-chevron-right ml-1 mr-1"></i>' : ''} ${select}`;
+            $('.hint span').html(t);
+        }
+
+        function renderList(collection, type) {
+            var html = '';
+            for (var item of collection) {
+                html += `<li
+                            class="list-group-item"
+                            data-id="${item.id}"
+                            data-type="${type}"
+                            data-name="${item.name}"
+                            data-localizedname="${item[localizedProp]}"
+                            >
+                            ${item[localizedProp]}
+                        </li>`;
+            }
+            $('.list-group-flush')
+                .html(html);
+
+            setHInt();
+        }
+
+        function fetchDivisions() {
+            renderList(divisions, 'division');
+        }
+
+        function fetchDistrictsByDivision(id, name, localizedName) {
+            selectedArea.division = { id, name, localizedName };
+            var dists = districts.filter(d => d.division_id == id);
+            renderList(dists, 'district');
+        }
+
+        function fetchUpazillasByDistrict(id, name, localizedName) {
+            selectedArea.district = { id, name, localizedName };
+            var upzs = upazillas.filter(u => u.district_id == id);
+            renderList(upzs, 'upazilla');
+        }
+
+        function fetchUnionsByUpazilla(id, name, localizedName) {
+            selectedArea.upazilla = { id, name, localizedName };
+            var uns = unions.filter(u => u.upazilla_id == id);
+            renderList(uns, 'union');
+        }
+
+        function finalizeAreaSelection(id, name, localizedName) {
+            selectedArea.union = { id, name, localizedName };
+            var { division, district, upazilla, union } = selectedArea;
+            var text = `${union.localizedName.trim()}, ${upazilla.localizedName.trim()}, ${district.localizedName.trim()}, ${division.localizedName.trim()}`;
+            $('.gc-hint span').text(text);
+            $('.area-selector').hide('slow');
+            resetSelectedArea();
+        }
+
+        function filterList(e) {
+            var value = e.target.value;
+            if (value != '' && value.trim() != '') {
+                var filter = value.toLowerCase();
+                $('.list-group-flush li').each(function () {
+                    var text = $(this).text().toLowerCase();
+                    if (text.includes(filter)) {
+                        $(this).show('slow');
+                    } else {
+                        $(this).hide('slow');
+                    }
+                });
+            } else {
+                $('.list-group-flush li').show('slow');
+            }
+        }
+
+
+        $(document).on('click', '.list-group-item', function () {
+            var id = $(this).data('id');
+            var type = $(this).data('type');
+            var name = $(this).data('name');
+            var localizedName = $(this).data('localizedname');
+
+            switch (type) {
+                case 'division':
+                    fetchDistrictsByDivision(id, name, localizedName);
+                    break;
+
+                case 'district':
+                    fetchUpazillasByDistrict(id, name, localizedName);
+                    break;
+
+                case 'upazilla':
+                    fetchUnionsByUpazilla(id, name, localizedName);
+                    break;
+
+                case 'union':
+                    finalizeAreaSelection(id, name, localizedName);
+                    break;
+
+                default:
+                    fetchDivisions();
+                    break;
+            }
+        });
+
+        $(document).on('click', '.hint span', function () {
+            var id = $(this).data('id');
+            var type = $(this).data('type');
+            var name = $(this).data('name');
+            var localizedName = $(this).data('localizedname');
+
+            if (type == 'upazilla') {
+                selectedArea.upazilla = { id: 0, name: '', localizedName: '' };
+                var { id, name, localizedName } = selectedArea.district;
+                fetchUpazillasByDistrict(id, name, localizedName);
+                return;
+            }
+
+            if (type == 'district') {
+                selectedArea.district = { id: 0, name: '', localizedName: '' };
+                selectedArea.upazilla = { id: 0, name: '', localizedName: '' };
+                var { id, name, localizedName } = selectedArea.division;
+                fetchDistrictsByDivision(id, name, localizedName);
+                return;
+            }
+
+            if (type == 'division') {
+                selectedArea.division = { id: 0, name: '', localizedName: '' };
+                selectedArea.district = { id: 0, name: '', localizedName: '' };
+                selectedArea.upazilla = { id: 0, name: '', localizedName: '' };
+                fetchDivisions();
+                return;
+            }
+
+        });
+
+        $('.change-location').click(function () {
+            var isOpened = $('.area-selector').css('display');
+            $('.area-selector').toggle('slow');
+            fetchDivisions();
+            isOpened ? resetSelectedArea() : fetchDivisions();
+        });
+
+        $(document).click(function (e) {
+
+            var { classList } = e.target;
+            if (classList.contains('list-group-item') || classList.contains('change-location') || classList.contains('hint-text')) {
+                return;
+            }
+
+            var el = document.querySelector('.area-selector');
+            var x = el && el.contains(e.target);
+
+            if (!x) {
+                $('.area-selector').hide('slow');
+                resetSelectedArea();
+            }
+
+        });
+    </script>
+
+}

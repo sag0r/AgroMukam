@@ -1,0 +1,68 @@
+﻿@model SpecificationAttributeModel
+@inject Nop.Services.Catalog.ICategoryService _categoryService
+@{
+    var availableCategories = _categoryService.GetAllCategories(0);
+    IEnumerable<SelectListItem> categories = availableCategories.Select(x =>
+    {
+        return new SelectListItem
+        {
+            Text = x.Name,
+            Value = x.Id.ToString()
+        };
+    });
+}
+
+
+    <div class="panel-body">
+        @(Html.LocalizedEditor<SpecificationAttributeModel, SpecificationAttributeLocalizedModel>("specificationattribute-localized",
+    @<div>
+        <div class="form-group">
+            <div class="col-md-3">
+                <nop-label asp-for="@Model.Locales[item].Name" />
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="@Model.Locales[item].Name" />
+                <span asp-validation-for="@Model.Locales[item].Name"></span>
+            </div>
+        </div>
+        <input type="hidden" asp-for="@Model.Locales[item].LanguageId" />
+    </div>
+,
+    @<div>
+        <div class="form-group">
+            <div class="col-md-3">
+                <nop-label asp-for="Name" />
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="Name" asp-required="true" />
+                <span asp-validation-for="Name"></span>
+            </div>
+        </div>
+    </div>))
+
+        <div class="form-group">
+            <div class="col-md-3">
+                <nop-label asp-for="CategoryName" />
+            </div>
+            <div class="col-md-9">
+                <nop-select asp-for="CategoryId" asp-items="categories" />
+                <span asp-validation-for="CategoryId"></span>
+            </div>
+            <script>
+            if ('@Model.CategoryId' == 0) {
+                document.querySelector('#CategoryId').insertAdjacentHTML('afterbegin', '<option value="0" selected></option>');
+            }
+            </script>
+        </div>
+
+        <div class="form-group">
+            <div class="col-md-3">
+                <nop-label asp-for="DisplayOrder" />
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="DisplayOrder" />
+                <span asp-validation-for="DisplayOrder"></span>
+            </div>
+        </div>
+    </div>
+

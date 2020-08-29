@@ -1,0 +1,42 @@
+﻿@{
+    Layout = "_ColumnsOne";
+    //title
+    Html.AddTitleParts(T("PageTitle.VendorDashboard.AccountStatements").Text);
+    //page class
+    Html.AppendPageCssClassParts("html-vendor-dashboard-unapproved-page");
+}
+<div class="page vendor-dashboard-unapproved-page">
+    <div class="page-body">
+
+        <div class="container">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card border-0 rounded-0 shadow">
+                        <img src="/Themes/Venture/Content/images/unapproved.jpg" class="card-img-top" alt="...">
+                        <div class="card-body text-center mt-4">
+                            <h1 class="text-muted">
+                                Thanks for checking out!
+                            </h1>
+                            <h2 class="text-info">
+                                You request to be a vendor has not been approved yet.
+                                We will get back to you as soon as we finish reviewing your request.
+                            </h2>
+
+                            <div class="row mt-4">
+                                <div class="col-12">
+                                    <div class="card border-0 rounded-0 shadow-sm pt-3">
+                                        <div class="card-body">
+                                            <h3> In the mean time feel free to contact us if you have any question. </h3>
+                                            <a href="@Url.RouteUrl("ContactUs")" class="btn bg-greenish text-white mt-2" style="width: 130px;"> Contact Us </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>

@@ -1,0 +1,139 @@
+﻿@model AddressModel
+@using Nop.Core
+@using Nop.Services.Customers
+@inject IWorkContext _workContext
+@inject ICustomerService _customerService
+
+@{
+    var isAdvisor = _customerService.IsAdvisor(_workContext.CurrentCustomer);
+}
+
+
+
+<input asp-for="Id" type="hidden" />
+<div class="edit-address">
+
+    @if (isAdvisor)
+    {
+        <div class="inputs">
+            <label asp-for="Company" asp-postfix=":"></label>
+            <input asp-for="Company" />
+            <nop-required />
+            <span asp-validation-for="Company"></span>
+        </div>
+        <div class="inputs">
+            <label asp-for="FullName" asp-postfix=":"></label>
+            <input asp-for="FullName" />
+            <nop-required />
+            <span asp-validation-for="FullName"></span>
+        </div>
+    }
+    else
+    {
+        <div class="inputs">
+            <label asp-for="FirstName" asp-postfix=":"></label>
+            <input asp-for="FirstName" />
+            <nop-required />
+            <span asp-validation-for="FirstName"></span>
+        </div>
+        <div class="inputs">
+            <label asp-for="LastName" asp-postfix=":"></label>
+            <input asp-for="LastName" />
+            <nop-required />
+            <span asp-validation-for="LastName"></span>
+        </div>
+
+    }
+
+    <div class="inputs">
+        <label asp-for="Email" asp-postfix=":"></label>
+        <input asp-for="Email" />
+        <nop-required />
+        <span asp-validation-for="Email"></span>
+    </div>
+    @if (!isAdvisor)
+    {
+        <div class="inputs">
+            <label asp-for="Company" asp-postfix=":"></label>
+            <input asp-for="Company" />
+            @if (Model.CompanyRequired)
+            {
+                <nop-required />
+            }
+            <span asp-validation-for="Company"></span>
+        </div>
+    }
+    <input type="hidden" value="161" name="CountryId" id="CountryId" />
+
+    <div class="inputs">
+        <label asp-for="RegionId" asp-postfix=":"></label>
+        <select asp-for="RegionId"></select>
+    </div>
+    <div class="inputs">
+        <label asp-for="CityId" asp-postfix=":"></label>
+        <select asp-for="CityId"></select>
+    </div>
+    <div class="inputs">
+        <label asp-for="AreaId" asp-postfix=":"></label>
+        <select asp-for="AreaId"></select>
+    </div>
+    <div class="inputs">
+        <label asp-for="StreetAddress" asp-postfix=":"></label>
+        <input asp-for="StreetAddress" />
+    </div>
+    @if (Model.CustomAddressAttributes.Count > 0)
+    {
+        @await Html.PartialAsync("_AddressAttributes", Model.CustomAddressAttributes)
+    }
+</div>
+
+<script asp-location="Footer">
+
+    var emptyOption = '<option value="0">--- &nbsp; Select &nbsp; ---</option>';
+
+        function generateAddressOptions(selector, data, selectedVal) {
+            var el = $(selector);
+            el.html(emptyOption);
+
+            $.each(data,
+                function (id, option) {
+                    el.append($('<option></option>').val(option.Id)
+                        .html(option.Name));
+                });
+
+            el.val(selectedVal);
+            setTimeout(function () {
+                $(selector).trigger('change');
+            }, 0);
+        }
+
+        var selectedCountry = $('#CountryId').val();
+        var url = `@(Url.RouteUrl("GetRegionsByCountryId"))?countryId=${selectedCountry}`;
+
+        $.get(url, function (resp) {
+            console.log('regions', resp);
+            generateAddressOptions('#BillingNewAddress_RegionId', resp, `@Model.RegionId`);
+        });
+
+        $('#BillingNewAddress_RegionId').change(function () {
+            $('#BillingNewAddress_AreaId').html(emptyOption);
+            var val = $(this).val();
+            var url = `@(Url.RouteUrl("GetCitiesByRegionId"))?regionId=${val}`;
+
+            $.get(url, function (resp) {
+                generateAddressOptions('#BillingNewAddress_CityId', resp, `@Model.CityId`);
+            });
+        });
+
+        $('#BillingNewAddress_CityId').change(function () {
+            $('#BillingNewAddress_AreaId').html(emptyOption);
+            var val = $(this).val();
+            var url = `@(Url.RouteUrl("GetAreasByCityId"))?cityId=${val}`;
+
+            $.get(url, function (resp) {
+                generateAddressOptions('#BillingNewAddress_AreaId', resp, `@Model.AreaId`);
+            });
+
+        });
+
+</script>

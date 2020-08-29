@@ -1,0 +1,445 @@
+﻿@{
+    Layout = "_ColumnsOne";
+
+    //title
+    Html.AddTitleParts("Messaging");
+    //page class
+    Html.AppendPageCssClassParts("html-contact-page");
+}
+@using Nop.Core
+@using Nop.Core.Domain.Customers
+@using Nop.Services.Common
+@using Nop.Services.Customers
+@using Nop.Services.Vendors 
+@inject IGenericAttributeService _genericAttributeService
+@inject IWorkContext _workContext
+@inject ICustomerService _customerService
+@inject IVendorService _vendorService 
+
+@{
+
+    //  Contact (chat-to) user id, if any
+    var cid = Context.Request.Query["cid"];
+
+    var messageTo = 0;
+    var messageToCustomerName = string.Empty;
+    if (!String.IsNullOrEmpty(cid))
+    {
+        var contactId = Convert.ToInt32(cid);
+        var customers = _customerService.GetAllCustomers(null, null, 0, contactId);
+        if (customers.Count > 0)
+        {
+            var customer = customers.FirstOrDefault();
+            messageTo = customer.Id;
+            var vendor = _vendorService.GetVendorById(customer.VendorId);
+            if (vendor != null)
+                messageToCustomerName = vendor.SystemName;
+        }
+    }
+
+}
+
+<input type="hidden" value="@messageTo" id="msgTo">
+<input type="hidden" value="@messageToCustomerName" id="msgToCName">
+
+<style>
+
+    .cursor-pointer {
+        cursor: pointer !important;
+    }
+
+    .selected-contact {
+        color: #a6cf27 !important;
+    }
+
+</style>
+<div class="page contact-page">
+    <div class="page-title">
+        <h1>Chat Messaging </h1>
+    </div>
+    <div class="container">
+
+        <div class="row">
+            <div class="col-4">
+                <div class="card p-2 shadow-sm">
+                    <div class="card-body">
+                        <div class="fieldset">
+                            <div class="title">
+                                <strong>Online Contacts</strong>
+                            </div>
+                            <div class="contacts">
+                                <ul class="list-group list-group-flush"></ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-8">
+                <div class="card p-2 shadow-sm">
+                    <div class="card-body">
+                        <div class="no-convo-selected">
+                            <div class="p-5">
+                                <h3> Please select a contact to view conversation </h3>
+                            </div>
+                        </div>
+                        <div class="chatbox" style="display: none;">
+                            <div class="chat-history">
+                                <div class="fieldset">
+                                    <div class="title">
+                                        <strong>Conversation</strong>
+                                    </div>
+                                    <div class="conversation border" style="height: 300px; overflow: hidden scroll;">
+                                        <div class="row" id="messagesList"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="send-message">
+                                <div class="fieldset">
+                                    <div class="title"></div>
+                                    <div class="form-group inputs">
+                                        <div class="input-group">
+                                            <input type="text" id="messageInput" class="form-control" placeholder="Type your message here">
+                                            <div class="input-group-append">
+                                                <button class="btn btn-success btn-sendMsg" id="sendButton" type="button">Send</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+</div>
+
+<script asp-location="Footer">
+
+    $(document).ready(function () {
+        var selectedContact = $('#msgTo').val();
+        var selectedContactCName = $('#msgToCName').val();
+
+        var blockedMsg = '';
+
+        // Temporary fix: "Cannot send data if the connection is not in the 'Connected' State."
+        setTimeout(function () {
+            connection.send('FetchContactList', customerId);
+
+            if (selectedContact > 0) {
+
+                var alreadyInList = $(`.contacts ul li[data-cid="${selectedContact}"]`).length > 0;
+                console.log('ail', alreadyInList);
+
+                if (!alreadyInList) {
+                    var html = `<li
+                        data-cid="${selectedContact}"
+                        class="list-group-item cursor-pointer">
+                    ${selectedContactCName}
+                </li>`;
+                    $('.contacts ul').append(html);
+                }
+
+                fetchMessageHistory(customerId, selectedContact);
+            }
+
+            setChatBoxContent();
+            setActiveContact();
+        }, 1500);        
+
+        // Whenever Contact List updates
+        connection.on('contactListUpdated', function (contacts) {
+            console.log('contactListUpdated', contacts);
+
+            if (contacts.length > 0) {
+                generateContactList(contacts);
+            }
+
+        });
+
+        // Chat History
+        connection.on('chatHistory', function (history) {
+            console.log('chatHistory', history);
+
+            if (history.length > 0) {
+                appendChatHistory(history, true);
+            }
+
+        });
+
+
+        connection.on('messageReceived', function (message) {
+            console.log('msg received', message, selectedContact);
+
+            var alreadyInList = $(`.contacts ul li[data-cid="${message.fromId}"]`).length > 0;
+
+            if (!alreadyInList) {
+                connection.send('FetchContactList', customerId);
+            }
+
+            setNewMessageBadge(message.fromId);
+            if (selectedContact == message.toId || selectedContact == message.fromId) {
+                appendChatHistory(message, false);
+            }
+        });
+
+        // Send message on 'Send' button click
+        $('#sendButton').click(function () {
+            sendMessage();
+        });
+
+        // Also send message if 'Enter' pressed
+        $('#messageInput').keyup(function (e) {
+            if (e.keyCode === 13) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+
+        /**/
+        $(document).on('click', '.list-group-item', function () {
+            var id = $(this).data('cid');
+            var isAlreadySelected = $(this).hasClass('selected-contact');
+            console.log('contact clicked', id, isAlreadySelected);
+            if (!isAlreadySelected) {
+                selectedContact = id;
+                console.log('now selected', selectedContact);
+                $('.list-group-item').removeClass('selected-contact');
+                $(this).addClass('selected-contact');
+                setActiveContact();
+                setChatBoxContent();
+                $('#messagesList').html(' ');
+            }
+            fetchMessageHistory(customerId, id);
+
+        });
+
+        /**/
+        function sendMessage() {
+            if (selectedContact == 0) {
+                console.log('no selected contact, return');
+                return false;
+            }
+
+            console.log('send to selected contact');
+
+            var user = $('#cId').val();
+            var toId = selectedContact;
+            var msg = $('#messageInput').val();
+            var customermName = $('#cName').val();
+
+            var message = {
+                fromId: parseInt(user),
+                toId: parseInt(toId),
+                message: msg,
+                customerName: customermName
+            };
+
+            if (!checkForContactInfo(msg)) {
+                console.log('contact info found in msg');
+                blockedMsg = msg;
+                message.dateSent = new Date();
+                appendWarningMessage(message);
+                return;
+            }
+
+            connection.invoke("SendMessage", message).catch(function (err) {
+                return console.error(err.toString());
+            });
+            $('#messageInput').val(' ');
+            removeNewMessageBadge(toId);
+        }
+
+        /**/
+        function checkForContactInfo(text) {
+
+            text = text.trim();
+
+            if (blockedMsg.trim().length > 0) {
+                if (blockedMsg.trim().includes(text)) {
+                    return false;
+                }
+            }
+
+            if (text.includes('@@')) {
+                return false;
+            }
+
+            if ((text.startsWith('88') || text.startsWith('880')) && text.length == 13) {
+                return false;
+            }
+
+            if ((text.startsWith('013') || text.startsWith('014') || text.startsWith('015') || text.startsWith('016') || text.startsWith('017') || text.startsWith('018') || text.startsWith('019')) && text.length == 11) {
+                return false;
+            }
+
+            if ((text.startsWith('13') || text.startsWith('14') || text.startsWith('15') || text.startsWith('16') || text.startsWith('17') || text.startsWith('18') || text.startsWith('19')) && text.length == 10) {
+                return false;
+            }
+
+            if ((text.startsWith('31') || text.startsWith('41') || text.startsWith('51') || text.startsWith('61') || text.startsWith('71') || text.startsWith('81') || text.startsWith('91')) && text.length == 9) {
+                return false;
+            }
+
+            return true;
+
+            //var isNotEmailAdrs = !text.includes('@@');
+            //var hasCountryCode = text.startsWith('88') || text.startsWith('880');
+            //var hasMobileNumber = (text.startsWith('01') && text.length == 11) || (text.startsWith('1') && text.length == 10);
+            //var trickyNumber = (text.startsWith('31') || text.startsWith('41') || text.startsWith('51') || text.startsWith('61') || text.startsWith('71') || text.startsWith('81') || text.startsWith('91')) && text.length == 9;
+
+            //return isNotEmailAdrs && !hasCountryCode && !hasMobileNumber && !trickyNumber;
+        }
+
+        /**/
+        function appendWarningMessage(msg) {
+            appendChatHistory(msg, false);
+
+            var br = ' border rounded-pill ';
+            var mp = ' pt-2 pb-2 pl-4 pr-4 mt-1 mb-1 ml-auto mr-auto ';
+            var t = ' text-center font-latotext-warning ';
+            var w = ' w-75 ';
+
+            var warnMsg = `<div class="col-12 m-warn">
+                <div class="${br + mp + t + w}">
+                    @T("ChatMessage.Warning")
+                </div>
+            </div>`;
+
+            $('#messagesList').append(warnMsg);
+            $('#messageInput').val(' ');
+
+            var els = $('#messagesList').find('.col-12:not(.m-warn)');
+            if (els.length > 0) {
+                var h4 = $(els[els.length - 1]).find('h4');
+                $('<i class="fas fa-exclamation-triangle text-warning"></i>').insertBefore(h4);
+            }
+
+        }
+
+        /**/
+        function generateContactList(contacts) {
+            var customerId = $('#cId').val();
+            var uContacts = contacts.filter(x => x.participant.customerId != customerId);
+            var contactListHtml = '';
+            for (var contact of uContacts) {
+                var alreadyInList = $(`.contacts ul li[data-cid="${contact.participant.customerId}"]`).length > 0;
+
+                console.log('aill', alreadyInList);
+
+                if (!alreadyInList) {
+                    contactListHtml += `<li
+                            data-cid="${contact.participant.customerId}"
+                            class="list-group-item cursor-pointer">
+                        ${contact.participant.displayName}
+                    </li>`;
+                }
+            }
+            $('.contacts ul').append(contactListHtml);
+            setActiveContact();
+        }
+
+        /**/
+        function setChatBoxContent() {
+            if (selectedContact > 0) {
+                $('.no-convo-selected').hide();
+                $('.chatbox').show();
+            } else {
+                $('.chatbox').hide();
+                $('.no-convo-selected').show();
+            }
+        }
+
+        /**/
+        function setActiveContact() {
+            if (selectedContact > 0) {
+                $('.contacts ul li').each(function () {
+                    var id = $(this).data('cid');
+                    if (id == selectedContact) {
+                        $(this).addClass('selected-contact');
+                    }
+                });
+            } else {
+                $('.contacts ul li').removeClass('selected-contact');
+            }
+        }
+
+        /**/
+        function setNewMessageBadge(fromId) {
+            console.log('set badge', fromId);
+            $('.contacts ul li').each(function () {
+                var id = $(this).data('cid');
+                if (id == fromId) {
+                    var noBadge = $(this).find('span').length == 0;
+                    if (noBadge) {
+                        $(this).append('<span class="badge badge-success">New</span>');
+                    }
+                }
+            });
+        }
+
+        /**/
+        function removeNewMessageBadge(toId) {
+            console.log('remove badge', toId);
+            $('.contacts ul li').each(function () {
+                var id = $(this).data('cid');
+                if (id == toId) {
+                    $(this).find('span').remove();
+                }
+            });
+        }
+
+        /**/
+        function scrollToFitMessages() {
+            $('.conversation').stop().animate({
+                scrollTop: $('.conversation')[0].scrollHeight
+            }, 800);
+        }
+
+        /**/
+        function fetchMessageHistory(from, to) {
+            connection.send('GetChatHistory', from, to);
+            removeNewMessageBadge(to);
+        }
+
+        /**/
+        function appendChatHistory(history, isCollection) {
+
+            var msgItem = '';
+
+            if (isCollection) {
+                $('#messagesList').html(' ');
+                for (var item of history) {
+                    msgItem += generateChatMsgHTML(item);
+                }
+            } else {
+                msgItem += generateChatMsgHTML(history);
+            }
+
+            $('#messagesList').append(msgItem);
+            scrollToFitMessages();
+        }
+
+        /**/
+        function generateChatMsgHTML(content) {
+            console.log('cmhtml', content);
+            var user = $('#cId').val();
+            var className = user == content.fromId ? 'float-right text-right' : 'float-left text-left bg-light';
+            var dt = new Date(content.dateSent);
+
+            return `<div class="col-12">
+                <div class="w-75 m-1 pt-2 pb-2 pl-4 pr-4 border rounded-pill ${className}">
+                    <h4> ${content.customerName} </h4>
+                    <h6 class="msg-dt"> ${dt.toLocaleString()} </h6>
+                    <p class="mt-2"> ${content.message} </p>
+                </div>
+            </div>`;
+        }
+
+    });
+
+
+</script>

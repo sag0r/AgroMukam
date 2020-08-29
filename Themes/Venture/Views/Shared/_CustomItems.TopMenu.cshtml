@@ -1,0 +1,133 @@
+﻿@using Nop.Core
+@using Nop.Services.Helpers
+@using Nop.Web.Factories
+@using Nop.Core.Infrastructure
+@using Nop.Core.Domain.Customers;
+@inject IHelperService _helperService
+@inject IOrderModelFactory _orderModelfactory
+@inject IWorkContext _workContext 
+@{
+    bool isLoggedIn = !String.IsNullOrEmpty(_workContext.CurrentCustomer.Email);
+}
+@functions {
+    public string GetRollOverString(string resourceName)
+    {
+        return _helperService
+            .GetRollOverTextForStringResource(resourceName);
+    }
+}
+
+
+<li class="h-100">
+    <a href="#" class="navtext h-100">
+        <span title="@GetRollOverString("MegaMenu.Customer")">@T("MegaMenu.Customer")</span>
+        <span title="@GetRollOverString("MegaMenu.Care")">@T("MegaMenu.Care")</span>
+    </a>
+    <div class="wsmegamenu clearfix halfmenu p-0">
+        <div class="wsshopwp h-100">
+            <ul class="wstabitem">
+                <li>
+                    <a href="#" style="width: 100%;" title="@GetRollOverString("MegaMenu.HelpCenter")">
+                        <img src="/Themes/Venture/Content/images/category-icons/help-center.png" />
+                        <span style="vertical-align: middle;"> @T("MegaMenu.HelpCenter") </span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" style="width: 100%;" title="@GetRollOverString("MegaMenu.Order")">
+                        <img src="/Themes/Venture/Content/images/category-icons/order.png" />
+                        <span style="vertical-align: middle;"> @T("MegaMenu.Order") </span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" style="width: 100%;" title="@GetRollOverString("MegaMenu.ShippingAndDelivery")">
+                        <img src="/Themes/Venture/Content/images/category-icons/shipping.png" />
+                        <span style="vertical-align: middle;"> @T("MegaMenu.ShippingAndDelivery") </span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" style="width: 100%;" title="@GetRollOverString("MegaMenu.Payment")">
+                        <img src="/Themes/Venture/Content/images/category-icons/payment.png" />
+                        <span style="vertical-align: middle;"> @T("MegaMenu.Payment") </span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" style="width: 100%;" title="@GetRollOverString("MegaMenu.ReturnsAndRefunds")">
+                        <img src="/Themes/Venture/Content/images/category-icons/refund.png" />
+                        <span style="vertical-align: middle;"> @T("MegaMenu.ReturnsAndRefunds") </span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</li>
+<li class="h-100">
+    <a href="#" class="navtext h-100">
+        <span title="@GetRollOverString("MegaMenu.TrackMy")">@T("MegaMenu.TrackMy")</span>
+        <span title="@GetRollOverString("MegaMenu.Order")">@T("MegaMenu.Order")</span>
+    </a>
+    <div class="wsmegamenu clearfix halfmenu p-0">
+        <div class="wsshopwp h-100">
+            <ul class="wstabitem p-3" style="width: 300px;">
+
+                @if (isLoggedIn)
+                {
+                    var orders = _orderModelfactory.PrepareCustomerOrderListModel();
+                    <li>
+                        <h3 class="text-greenish">@T("MegaMenu.MyLastOrder")</h3>
+                        <ul class="m-2">
+                            @if (orders.Orders.Count > 0)
+                            {
+                                foreach (var order in orders.Orders)
+                                {
+                                    <li>
+                                        <a class="text-primary" href="@Url.RouteUrl("OrderDetails", new { orderId = order.Id })">
+                                            @T("Order.Order#")@order.Id
+                                        </a>
+                                    </li>
+                                }
+                            }
+                            else
+                            {
+                                <li> @T("MegaMenu.NoOrderToTrack") </li>
+                            }
+                        </ul>
+                    </li>
+                    <li><hr style="border-top: 1px;"></li>
+                }
+                <li>
+                    <h3 class="text-greenish mt-3 mb-2">@T("MegaMenu.TackMyOrder")</h3>
+
+                    @if (!isLoggedIn)
+                    {
+                        <div class="form-group">
+                            <label for="trackingEmail">@T("MegaMenu.PleaseConfirmYourEmail")</label>
+                            <input type="text" class="form-control mt-1" id="trackingEmail">
+                        </div>
+                    }
+
+                    <div class="form-group">
+                        <label for="trackingOrderNo">@T("MegaMenu.YourOrderNo")</label>
+                        <div class="input-group mb-3 mt-1">
+                            <input type="text" class="form-control" placeholder="e.g: 123456789" id="orderNumber">
+                            <div class="input-group-append">
+                                <button class="btn btn-success" type="button" id="trackingOrderNo">
+                                    <i class="fal fa-chevron-right"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <script asp-location="Footer">
+                            $(document).ready(function () {
+                                $('#trackingOrderNo').click(function () {
+                                    var no = $('#orderNumber').val();
+                                    window.location = `/orderdetails/${no}`;
+                                });
+                            });
+                        </script>
+                    </div>
+
+                </li>
+
+            </ul>
+        </div>
+    </div>
+</li>

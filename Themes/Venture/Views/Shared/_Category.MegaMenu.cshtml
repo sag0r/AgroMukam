@@ -1,0 +1,37 @@
+﻿@model IList<CategorySimpleModel>
+@{
+//var categories = Model.OrderByDescending(x => x.SubCategories.Count).ToList();
+}
+<div class="masonry">
+    @foreach (var category in Model)
+    {
+        <div class="masonry-item">
+            <div class="masonry-content p-1">
+                <h4 style="line-height: 16px;">
+                    <a href="@Url.RouteUrl("Category", new { SeName = category.SeName })" title="@category.RollOverText">@category.Name</a>
+                </h4>
+                <hr>
+                @if (category.HaveSubCategories)
+                {
+                    <ul class="subcategory-ul">
+                        @await Html.PartialAsync("_Category.MegaMenu.Child", category.SubCategories)
+                    </ul>
+                }
+            </div>
+        </div>
+    }
+
+    @*
+        1. otherwise the last item in the grid appears with a huge padding-bottom
+        2. one empty item causes overflow-explosion & the last itemin the grid looks ugly
+    *@
+    <div class="masonry-item">
+        <div class="masonry-content"></div>
+    </div>
+    <div class="masonry-item">
+        <div class="masonry-content"></div>
+    </div>
+    <div class="masonry-item">
+        <div class="masonry-content"></div>
+    </div>
+</div>

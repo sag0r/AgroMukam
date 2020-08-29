@@ -1,0 +1,468 @@
+﻿@model VendorInfoModel
+@using Nop.Core 
+@using Nop.Core.Domain.Catalog
+@using Nop.Core.Domain.Customers 
+@using Nop.Services.Common
+@using Nop.Services.Directory
+
+@inject IAddressService _addressService 
+@inject IAreaService _areaService
+@inject ICityService _cityService
+@inject IRegionService _regionService
+@inject IGenericAttributeService _genericAttributeService
+@inject IWorkContext _workContext
+
+@{
+    Layout = "_ColumnsTwo";
+
+    //title
+    Html.AddTitleParts(T("PageTitle.VendorInfo").Text);
+    //page class
+    Html.AppendPageCssClassParts("html-account-page");
+    Html.AppendPageCssClassParts("html-vendorinfo-page");
+}
+@section left
+{
+    @await Component.InvokeAsync("CustomerNavigation", new { selectedTabId = CustomerNavigationEnum.VendorInfo })
+}
+
+@{
+    var actTypeAttr = Model.VendorAttributes
+        .Where(x => x.Name == "Account Type")
+        .FirstOrDefault();
+
+    var actType = actTypeAttr.Values.Where(x => x.IsPreSelected).FirstOrDefault();
+
+    var customer = _workContext.CurrentCustomer;
+    var address = _genericAttributeService.GetAttribute<string>(customer, NopCustomerDefaults.StreetAddressAttribute);
+    var businessRegionId = _genericAttributeService.GetAttribute<int>(customer, NopCustomerDefaults.RegionIdAttribute);
+    var businessCityId = _genericAttributeService.GetAttribute<int>(customer, NopCustomerDefaults.CityIdAttribute);
+    var businessAreaId = _genericAttributeService.GetAttribute<int>(customer, NopCustomerDefaults.AreaIdAttribute);
+
+    var businessRegion = _regionService.GetRegionById(businessRegionId);
+    var businessCity = _cityService.GetCityById(businessCityId);
+    var businessArea = _areaService.GetAreaById(businessAreaId);
+
+    var warehouseRegion = _regionService.GetRegionById(Model.RegionId);
+    var warehouseCity = _cityService.GetCityById(Model.CityId);
+    var warehouseArea = _areaService.GetAreaById(Model.AreaId);
+
+    var isVendor = customer.CustomerRoles
+        .FirstOrDefault(x => x.Name == "Vendors") != null;
+
+}
+
+<div class="page account-page vendorinfo-page">
+    <div class="page-title">
+        <h1> 
+            Business Info
+            @if (!isVendor)
+            {
+                <small class="text-muted"> (Pending Approval) </small>
+            }
+        </h1>
+    </div>
+    <div class="page-body">
+
+        <div class="card border-0 rounded-0 shadow-sm">
+            <div class="card-header">
+                Customer Info
+            </div>
+            <div class="card-body">
+                <div class="table-wrapper">
+                    <table class="data-table">
+                        <tbody>
+                            <tr>
+                                <td> Account Type </td>
+                                <td>
+                                    @if (actType == null)
+                                    {
+                                        <span> Not Selected </span>
+                                    }
+                                    else
+                                    {
+                                        <span> @actType.Name </span>
+                                    }
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td>Business Name</td>
+                                <td>@Model.Name</td>
+                            </tr>
+                            <tr>
+                                <td>Business Email</td>
+                                <td>@Model.Email</td>
+                            </tr>
+                            <tr>
+                                <td>Description</td>
+                                <td>@Model.Description</td>
+                            </tr>
+
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="card border-0 rounded-0 shadow-sm mt-4">
+            <div class="card-header">
+                Address Book
+            </div>
+            <div class="card-body">
+                <div class="table-wrapper">
+                    <table class="data-table">
+                        <tbody>
+
+                            <tr>
+                                <td colspan="2" class="font-weight-bold">
+                                    Business
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td>Region</td>
+                                <td>
+                                    @if (businessRegion != null)
+                                    {
+                                        @businessRegion.Name
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted"> None Selected </span>
+                                    }
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>City</td>
+                                <td>
+                                    @if (businessCity != null)
+                                    {
+                                        @businessCity.Name
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted"> None Selected </span>
+                                    }
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Area</td>
+                                <td>
+                                    @if (businessArea != null)
+                                    {
+                                        @businessArea.Name
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted"> None Selected </span>
+                                    }
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Address</td>
+                                <td>
+                                    @if (!String.IsNullOrEmpty(address))
+                                    {
+                                        @address
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted"> None Selected </span>
+                                    }
+                                </td>
+                            </tr>
+
+                            @*  *@
+                            <tr>
+                                <td colspan="2" class="font-weight-bold">
+                                    Warehouse
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td>Region</td>
+                                <td>
+                                    @if (warehouseRegion != null)
+                                    {
+                                        @warehouseRegion.Name
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted"> None Selected </span>
+                                    }
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>City</td>
+                                <td>
+                                    @if (warehouseCity != null)
+                                    {
+                                        @warehouseCity.Name
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted"> None Selected </span>
+                                    }
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Area</td>
+                                <td>
+                                    @if (warehouseArea != null)
+                                    {
+                                        @warehouseArea.Name
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted"> None Selected </span>
+                                    }
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Address</td>
+                                <td>
+                                    @if (!String.IsNullOrEmpty(Model.StreetAddress))
+                                    {
+                                        @Model.StreetAddress
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted"> None Selected </span>
+                                    }
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="card border-0 rounded-0  shadow-sm mt-4">
+            <div class="card-header">
+                Profile Info
+            </div>
+            <div class="card-body">
+                <div class="table-wrapper">
+                    <table class="data-table">
+                        <tbody>
+                            @if (actType.Name == "Business")
+                            {
+                                var businessVerificationAttrs = Model.VendorAttributes
+                                .Where(x => x.FormStepId == 3 && x.FormGroupName == "business" && x.DisplayOrder == 0)
+                                .ToList();
+
+                                if (businessVerificationAttrs.Count > 0)
+                                {
+                                    foreach (var attr in businessVerificationAttrs)
+                                    {
+                                        <tr>
+                                            <td> @attr.Name </td>
+                                            <td>
+                                                @attr.DefaultValue
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                                var vBusinessType = Model.VendorAttributes
+                                        .FirstOrDefault(x => x.FormStepId == 3 && x.FormGroupName == "business" && x.DisplayOrder == 1);
+                                if (vBusinessType != null)
+                                {
+                                    <tr>
+                                        <td> @vBusinessType.Name </td>
+                                        <td>
+                                            @foreach (var val in vBusinessType.Values)
+                                            {
+                                                if (val.IsPreSelected)
+                                                {
+                                                    <span class="mr-2"> @val.Name, </span>
+                                                }
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                var profileVerificationAttrs = Model.VendorAttributes
+                                    .Where(x => x.FormStepId == 3 && x.FormGroupName == "personal" && x.DisplayOrder == 0)
+                                    .ToList();
+
+                                if (profileVerificationAttrs.Count > 0)
+                                {
+                                    foreach (var attr in profileVerificationAttrs)
+                                    {
+                                        <tr>
+                                            <td> @attr.Name </td>
+                                            <td>
+
+                                                @if (attr.AttributeControlType == AttributeControlType.DropdownList)
+                                                {
+                                                    var val = attr.Values.FirstOrDefault(x => x.IsPreSelected);
+                                                    if (val == null)
+                                                    {
+                                                        <span> Not Selected </span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span> @val.Name  </span>
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    @attr.DefaultValue
+                                                }
+
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+
+                                var businessType = Model.VendorAttributes
+                                        .FirstOrDefault(x => x.FormStepId == 3 && x.FormGroupName == "personal" && x.DisplayOrder == 1);
+                                if (businessType != null)
+                                {
+                                    <tr>
+                                        <td> @businessType.Name </td>
+                                        <td>
+                                            @foreach (var val in businessType.Values)
+                                            {
+                                                if (val.IsPreSelected)
+                                                {
+                                                    <span class="mr-2"> @val.Name, </span>
+                                                }
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="card border-0 rounded-0  shadow-sm mt-4">
+            <div class="card-header">
+                Payment Info
+            </div>
+            <div class="card-body">
+                <div class="table-wrapper">
+                    <table class="data-table">
+                        <tbody>
+                            @if (actType.Name == "Business")
+                            {
+                                var customerBankDetailsAttrs = Model.VendorAttributes
+                                    .Where(x => x.FormStepId == 4 && x.FormGroupName == "business" && x.DisplayOrder == 0)
+                                    .ToList();
+
+                                if (customerBankDetailsAttrs.Count > 0)
+                                {
+                                    foreach (var attr in customerBankDetailsAttrs)
+                                    {
+                                        <tr>
+                                            <td> @attr.Name </td>
+                                            <td>
+                                                @attr.DefaultValue
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+
+                                var sellerTINOfVendor = Model.VendorAttributes
+                                        .FirstOrDefault(x => x.FormStepId == 4 && x.FormGroupName == "business" && x.DisplayOrder == 2);
+                                if (sellerTINOfVendor != null)
+                                {
+                                    <tr>
+                                        <td> @sellerTINOfVendor.Name </td>
+                                        <td>
+                                            @sellerTINOfVendor.DefaultValue
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                var personalPaymentAttrs = Model.VendorAttributes
+                                .Where(x => x.FormStepId == 4 && x.FormGroupName == "personal" && x.DisplayOrder == 0)
+                                .ToList();
+
+                                if (personalPaymentAttrs.Count > 0)
+                                {
+                                    foreach (var attr in personalPaymentAttrs)
+                                    {
+                                        <tr>
+                                            <td> @attr.Name </td>
+                                            <td>
+                                                @if (attr.AttributeControlType == AttributeControlType.DropdownList)
+                                                {
+                                                    var val = attr.Values.FirstOrDefault(x => x.IsPreSelected);
+                                                    if (val == null)
+                                                    {
+                                                        <span> Not Selected </span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span> @val.Name  </span>
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    @attr.DefaultValue
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+
+                                var personalBankDetailsAttr = Model.VendorAttributes
+                                        .Where(x => x.FormStepId == 4 && x.FormGroupName == "personal" && x.DisplayOrder == 1).ToList();
+                                if (personalBankDetailsAttr.Count > 0)
+                                {
+                                    foreach (var attr in personalBankDetailsAttr)
+                                    {
+                                        <tr>
+                                            <td> @attr.Name </td>
+                                            <td>
+                                                @attr.DefaultValue
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+
+                                var sellerTINOfCustomer = Model.VendorAttributes
+                                        .FirstOrDefault(x => x.FormStepId == 4 && x.FormGroupName == "personal" && x.DisplayOrder == 2);
+                                if (sellerTINOfCustomer != null)
+                                {
+                                    <tr>
+                                        <td> @sellerTINOfCustomer.Name </td>
+                                        <td>
+                                            @sellerTINOfCustomer.DefaultValue
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="card border-0 rounded-0 shadow-sm mt-4">
+            <div class="card-body text-center">
+                <a href="@Url.RouteUrl("CustomerInfo")" class="btn btn-info">
+                    Click here to see Customer Details
+                </a>
+            </div>
+        </div>
+
+        <div class="card border-0 rounded-0 shadow mt-5">
+            <div class="card-body text-center">
+                <h4 class="text-muted">
+                    Please contact <a class="text-greenish" href="@Url.RouteUrl("ContactUs")"> AgroMukam Support </a> to change your Vendor Details.
+                </h4>
+            </div>
+        </div>
+
+    </div>
+</div>

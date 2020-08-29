@@ -1,0 +1,55 @@
+﻿@{
+    Layout = "_ColumnsOne";
+    //title
+    Html.AddTitleParts(T("PageTitle.VendorDashboard.AccountStatements").Text);
+    //page class
+    Html.AppendPageCssClassParts("html-vendor-dashboard-unauthorized-page");
+}
+<div class="page vendor-dashboard-unauthorized-page">
+    <div class="page-body">
+
+        <div class="container">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card border-0 rounded-0 shadow">
+                        <img src="/Themes/Venture/Content/images/error-403.jpg" class="card-img-top" alt="...">
+                        <div class="card-body text-center mt-4">
+                            <h1 class="text-muted">
+                                Access Denied
+                            </h1>
+                            <h2 class="text-danger"> You don't have access to view this page! </h2>
+
+                            <div class="row mt-4">
+                                <div class="col-12 col-md-6 col-lg-4 mb-4">
+                                    <div class="card border-0 rounded-0 shadow-sm pt-3" style="height: 150px;">
+                                        <div class="card-body">
+                                            <h3> Try to login as a vendor and come back </h3>
+                                            <a href="@Url.RouteUrl("VendorLogin")" class="btn bg-greenish text-white mt-2" style="width: 130px;"> Proceed </a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-6 col-lg-4 mb-4">
+                                    <div class="card border-0 rounded-0 shadow-sm pt-3" style="height: 150px;">
+                                        <div class="card-body">
+                                            <h3> Let us help you find the product you need </h3>
+                                            <a href="@Url.RouteUrl("ProductSearch")" class="btn bg-greenish text-white mt-2" style="width: 130px;"> Try </a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-12 col-lg-4 mb-4">
+                                    <div class="card border-0 rounded-0 shadow-sm pt-3" style="height: 150px;">
+                                        <div class="card-body">
+                                            <h3> I'm lost, take me to the Home page! </h3>
+                                            <a href="@Url.RouteUrl("Homepage")" class="btn bg-greenish text-white mt-2" style="width: 130px;"> Go </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>

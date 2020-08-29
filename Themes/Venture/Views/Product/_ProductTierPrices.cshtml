@@ -1,0 +1,110 @@
+﻿@model IList<ProductDetailsModel.TierPriceModel>
+@{
+    //When there is just one tier (with  qty 1), there are no actual savings in the list.
+    var displayTierPrices = Model.Count > 0 && !(Model.Count == 1 && Model[0].Quantity <= 1);
+    var oPrice = this.ViewData["originalPrice"];
+    var originalPrice = Convert.ToInt32(oPrice);
+}
+
+@functions{
+    public string GetPromoText(ProductDetailsModel.TierPriceModel promo, decimal price, bool fullText)
+    {
+        var promoPrice = Decimal.Parse(promo.Price.Replace('৳', ' ').Replace('$', ' '));
+
+        var spend = price * promo.Quantity;
+        var get = spend - promoPrice;
+
+        var strSpend = string.Format("{0:0}", spend);
+        var strGet = string.Format("{0:0}", get);
+
+        var text = "Get " + strGet + " off!";
+        var fText = "Spend " + strSpend + " to get " + strGet + " off!";
+
+        return fullText ? fText : text;
+    }
+}
+@if (displayTierPrices)
+{
+    <div class="w-100 product-tier-prices mt-4 mb-4 position-relative">
+        <div class="ptp-wrap">
+            <div class="ptp-text">
+                Promotions
+            </div>
+            <div class="ptp-title">
+                <span class="btn btn-danger btn-sm btn-block rounded-pill btn-show-promotions">
+                    @{
+                        var mainPromo = Model[0];
+                        var title = GetPromoText(mainPromo, originalPrice, true);
+                    }
+                    <span> @title </span>
+                    <i class="fas fa-caret-down ml-2 float-right" style="margin-top: 1px; float: right;"></i>
+                </span>
+            </div>
+        </div>
+        <div class="product-tier-prices-dropdown bg-white shadow" style="display: none;">
+            <ul class="list-group list-group-flush">
+                @foreach (var tierPrice in Model)
+                {
+                    var promoText = GetPromoText(tierPrice, originalPrice, true);
+                    var promoTitle = GetPromoText(tierPrice, originalPrice, false);
+
+                    <li class="list-group-item">
+                        <h4 class="text-yellow-dark">@promoTitle</h4>
+                        <span class="text-yellow-dark">@promoText</span>
+                    </li>
+                }
+            </ul>
+        </div>
+    </div>
+
+    <style>
+        .product-tier-prices {
+            position: relative;
+            width: 100%;
+            display: inline-block;
+        }
+        .ptp-title {
+            cursor: pointer;
+        }
+        .ptp-wrap {
+            display: block;
+        }
+        .ptp-wrap > div {
+            display: inline-block;
+            float: left;
+            padding: 5px 15px;
+            width: 25%;
+        }
+        .ptp-wrap > div ~ div {
+            background: #8fbf11;
+            width: 75%;
+        }
+        .product-tier-prices-dropdown {
+                position: absolute;
+                top: 40px;
+                width: 100%;
+                overflow-x: hidden;
+                z-index: 2;
+                box-shadow: 0 .125rem .25rem rgba(0,0,0,.075) !important;
+                background: #fff;
+        }
+    </style>
+
+    <script asp-location="Footer">
+        $(document).ready(function () {
+            $('.ptp-title').click(function () {
+                $('.product-tier-prices-dropdown').toggle("slow");
+            });
+
+            $(document).click(function (e) {
+                var el = document.querySelector('.product-tier-prices');
+                var x = el && el.contains(e.target);
+
+                if (!x) {
+                    $('.product-tier-prices-dropdown').hide("slow");
+                }
+
+            });
+        });
+    </script>
+}

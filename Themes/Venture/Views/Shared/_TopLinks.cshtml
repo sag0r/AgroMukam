@@ -1,0 +1,91 @@
+﻿@using Nop.Core
+@using Nop.Core.Domain.Customers
+@using Nop.Services.Common
+@using Nop.Services.Customers
+@using Nop.Services.Helpers
+@inject ICustomerService _customerService
+@inject IGenericAttributeService _genericAttributeService
+@inject IHelperService _helperService
+@inject IWorkContext _workContext
+@{
+    var customer = _workContext.CurrentCustomer;
+    bool isLoggedIn = _customerService.IsRegistered(customer);
+}
+
+@functions {
+    public string GetRollOverString(string resourceName)
+    {
+        return _helperService
+            .GetRollOverTextForStringResource(resourceName);
+    }
+}
+
+<div class="top-links desktop">
+    <ul>
+        @if (isLoggedIn)
+        {
+            <li class="dropdown">
+                <a href="#" id="dropdownMenuButton" data-toggle="dropdown" title="@GetRollOverString("TopLinks.WelcomeBack")">
+                    @T("TopLinks.WelcomeBack")
+
+                    @{
+                        var firstName = _genericAttributeService.GetAttribute<string>(customer, NopCustomerDefaults.FirstNameAttribute);
+
+                        @firstName
+                    }
+
+                </a>
+                <div class="dropdown-menu dropdown-menu-right border-0 rounded-0 shadow" aria-labelledby="dropdownMenuButton">
+
+                    <div class="list-group list-group-flush" style="font-size: 14px;">
+                        <a class="dropdown-item list-group-item text-secondary" href="@Url.RouteUrl("CustomerInfo")" title="@GetRollOverString("TopLinks.ManageMyAccount")">
+                            <i class="fas fa-user-tie mr-2"></i>
+                            @T("TopLinks.ManageMyAccount")
+                        </a>
+                        @if (customer.VendorId == 0)
+                        {
+                            <a class="dropdown-item list-group-item text-secondary" href="@Url.RouteUrl("CustomerOrders")" title="@GetRollOverString("TopLinks.MyOrders")">
+                                <i class="fas fa-boxes mr-2"></i>
+                                @T("TopLinks.MyOrders")
+                            </a>
+                            <a class="dropdown-item list-group-item text-secondary" href="@Url.RouteUrl("Wishlist")" title="@GetRollOverString("TopLinks.MyWishlistAndFollowedStores")">
+                                <i class="fas fa-heart mr-2"></i>
+                                @T("TopLinks.MyWishlistAndFollowedStores")
+                            </a>
+                            <a class="dropdown-item list-group-item text-secondary" href="@Url.RouteUrl("CustomerProductReviews")" title="@GetRollOverString("TopLinks.MyReviews")">
+                                <i class="fas fa-star mr-2"></i>
+                                @T("TopLinks.MyReviews")
+                            </a>
+                            <a class="dropdown-item list-group-item text-secondary" href="@Url.RouteUrl("CustomerReturnRequests")" title="@GetRollOverString("TopLinks.MyReturnsAndCancellations")">
+                                <i class="fas fa-undo mr-2"></i>
+                                @T("TopLinks.MyReturnsAndCancellations")
+                            </a>
+                        }
+                        else
+                        {
+                            <a class="dropdown-item list-group-item text-secondary" href="/Admin">
+                                <i class="fas fa-boxes mr-2"></i>
+                                @T("TopLinks.MyDashboard")
+                            </a>
+                        }
+                        <a class="dropdown-item list-group-item text-secondary" href="@Url.RouteUrl("Logout")" title="@GetRollOverString("TopLinks.Logout")">
+                            <i class="fas fa-power-off mr-2"></i>
+                            @T("TopLinks.Logout")
+                        </a>
+                    </div>
+
+
+                </div>
+            </li>
+        }
+        else
+        {
+            <li class="text-capitalize">
+                <a href="/login" title="@GetRollOverString("HeaderLinks.WelcomeGuest")">
+                    @T("HeaderLinks.WelcomeGuest")
+                </a>
+            </li>
+        }
+
+    </ul>
+</div>

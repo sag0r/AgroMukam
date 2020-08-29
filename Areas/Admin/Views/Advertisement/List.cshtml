@@ -1,0 +1,143 @@
+﻿@using Nop.Web.Areas.Admin.Models.Advertisements
+@using Nop.Services.Catalog
+@using Nop.Core.Domain.Advertisements
+@model AdvertisementSearchModel
+
+@inject ICategoryService _categoryService;
+
+@{
+    var temp = _categoryService.GetAllCategoriesByParentCategoryId(0);
+    var categories = temp.Select(x =>
+    {
+        return new SelectListItem
+        {
+            Text = x.Name,
+            Value = x.Id.ToString()
+        };
+    });
+}
+
+@{
+    //page title
+    ViewBag.Title = T("Admin.Promotions.Advertisements").Text;
+    //active menu item (system name)
+    Html.SetActiveMenuItemSystemName("Advertisements");
+}
+
+<nop-antiforgery-token />
+<div class="content-header clearfix">
+    <h1 class="pull-left">
+        @T("Admin.Promotions.Advertisements")
+    </h1>
+    <div class="pull-right">
+        <a asp-action="Create" class="btn bg-blue">
+            <i class="fa fa-plus-square"></i>
+            @T("Admin.Common.AddNew")
+        </a>
+        @await Component.InvokeAsync("AdminWidget", new { widgetZone = AdminWidgetZones.SpecificationAttributeListButtons })
+    </div>
+</div>
+
+<div class="content">
+    <div class="panel-group">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <p>
+                    List of available advertisements
+                </p>
+                @await Html.PartialAsync("Table", new DataTablesModel
+                {
+                    Name = "advertisements-grid",
+                    UrlRead = new DataUrl("List", "Advertisement", null),
+                    Length = Model.PageSize,
+                    LengthMenu = Model.AvailablePageSizes,
+                    ColumnCollection = new List<ColumnProperty>
+                    {
+                        new ColumnProperty(nameof(AdvertisementModel.Name))
+                        {
+                            Title = T("Admin.Promotions.Advertisements.Fields.Name").Text
+                        },
+                        new ColumnProperty(nameof(AdvertisementModel.AdPlacementId))
+                        {
+                            Title = T("Admin.Promotions.Advertisements.Fields.AdPlacement").Text,
+                            Render = new RenderCustom("renderAdPlacementValue")
+                        },
+                        new ColumnProperty(nameof(AdvertisementModel.AdTypeId))
+                        {
+                            Title = T("Admin.Promotions.Advertisements.Fields.AdType").Text,
+                            Render = new RenderCustom("renderAdTypeValue")
+                        },
+                        new ColumnProperty(nameof(AdvertisementModel.CategoryId))
+                        {
+                            Title = T("Admin.Promotions.Advertisements.Fields.Category").Text,
+                            Width = "260",
+                            Render = new RenderCustom("renderCategoryName")
+                        },
+                        new ColumnProperty(nameof(AdvertisementModel.StartDateUtc))
+                        {
+                            Title = T("Admin.Promotions.Advertisements.Fields.StartDate").Text,
+                            Render = new RenderDate()
+                        },
+                        new ColumnProperty(nameof(AdvertisementModel.EndDateUtc))
+                        {
+                            Title = T("Admin.Promotions.Advertisements.Fields.EndDate").Text,
+                            Render = new RenderDate()
+                        },
+                        new ColumnProperty(nameof(AdvertisementModel.Id))
+                        {
+                            Title = T("Admin.Common.Edit").Text,
+                            Width = "100",
+                            ClassName =  NopColumnClassDefaults.Button,
+                            Render = new RenderButtonEdit(new DataUrl("Edit"))
+                        }
+                    }
+                })
+
+                <script>
+
+                    var categories = [];
+                    var places = [
+                        { id: 10, value: 'Home Page Top' },
+                        { id: 20, value: 'Home Page Category Ads' },
+                        { id: 30, value: 'Home Page Category Wise Featured Ads' },
+                        { id: 40, value: 'Home Page Featured Products' },
+                        { id: 50, value: 'Mega Menu Category Wise Ads' },
+                        { id: 60, value: 'First Category Page Ads' },
+                        { id: 70, value: 'Second Category Page Ads' },
+                        { id: 80, value: 'Vendor Login Page Ads' },
+                        { id: 90, value: 'Other Login Page Ads' }
+                    ];
+                    var AdTypes = [
+                        { id: 0, value: 'N/A' },
+                        { id: 1, value: 'Banner' },
+                        { id: 2, value: 'Company Logo' }
+                    ];
+
+                    function renderCategoryName(data, type, row, meta) {
+                        if (row.CategoryId == 0) {
+                            return 'Unspecified';
+                        }
+
+                        if (categories.length == 0) {
+                            categories = JSON.parse(`@Json.Serialize(categories)`);
+                        }
+
+                        var category = categories.find(x => x.Value == row.CategoryId);
+                        var name = `${category ? category.Text : 'Unknown'}`;
+                        return name;
+                    }
+
+                    function renderAdPlacementValue(data, type, row, meta) {
+                        var place = places.find(x => x.id == row.AdPlacementId);
+                        return !place ? "Unspecified" : place.value;
+                    }
+
+                    function renderAdTypeValue(data, type, row, meta) {
+                        var adType = AdTypes.find(x => x.id == row.AdTypeId);
+                        return !adType ? "Unspecified" : adType.value;
+                    }
+                </script>
+            </div>
+        </div>
+    </div>
+</div>

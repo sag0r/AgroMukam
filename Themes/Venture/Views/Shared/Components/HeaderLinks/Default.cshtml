@@ -1,0 +1,68 @@
+﻿@model HeaderLinksModel
+@inject Nop.Core.IWebHelper webHelper
+
+<div class="header-links">
+    <div class="header-links-box">
+        @{
+            var threeItemsClass = string.Empty;
+            if (Model.AllowPrivateMessages && Model.IsAuthenticated)
+            {
+                threeItemsClass = "three-items";
+            }
+
+            var isAuthenticated = "not-authenticated";
+            if (Model.IsAuthenticated)
+            {
+                isAuthenticated = "is-authenticated";
+            }
+        }
+        <div class="header-links-box-top @isAuthenticated">
+            @await Component.InvokeAsync("Widget", new { widgetZone = PublicWidgetZones.HeaderLinksBefore })
+            @if (Model.IsAuthenticated)
+            {
+                <div class="header-link-wrapper account"><a href="@Url.RouteUrl("CustomerInfo")" title="@T("Account.MyAccount")" class="ico-account" style="background: #F1F8E9;">@T("Account.MyAccount")@*@Model.CustomerName*@</a></div>
+                <div class="header-link-wrapper logout"><a href="@Url.RouteUrl("Logout")" title="@T("Account.Logout")" class="ico-logout" style="background: #FBE9E7;">@T("Account.Logout")</a></div>
+            }
+            else
+            {
+                var returnUrl = webHelper.GetRawUrl(Context.Request);
+
+                <div class="header-link-wrapper login"><a href="@Url.RouteUrl("Login", new { returnUrl })" title="@T("Account.Login")" class="ico-login" style="background: #F1F8E9;">@T("Account.Login")</a></div>
+                <div class="header-link-wrapper register"><a href="@Url.RouteUrl("Register", new { returnUrl })" title="@T("Account.Register")" class="ico-register">@T("Account.Register")</a></div>
+            }
+        </div>
+        @*@if (Model.WishlistEnabled)
+        {
+            <div class="header-links-box-bottom">
+                <div class="header-link-wrapper ">
+                    <a href="@Url.RouteUrl("Wishlist")" title="@T("Wishlist")" class="ico-wishlist">
+                        <span class="wishlist-label">@T("Wishlist")</span>
+                        <span class="wishlist-qty">@T("Wishlist.HeaderQuantity", Model.WishlistItems)</span>
+                    </a>
+                </div>
+            </div>
+        }*@
+        @await Component.InvokeAsync("Widget", new { widgetZone = PublicWidgetZones.HeaderLinksAfter })
+    </div>
+    @if (Model.AllowPrivateMessages && !string.IsNullOrEmpty(Model.AlertMessage))
+    {
+        //new private message notification
+        <script asp-location="Footer">
+            $(document).ready(function () {
+                displayPopupNotification('@Html.Raw(JavaScriptEncoder.Default.Encode(Model.AlertMessage))', 'success', false);
+            });
+        </script>
+    }
+    @if (Model.ShoppingCartEnabled)
+    {
+        <script asp-location="Footer">
+            $(document).ready(function () {
+                $('.header').on('mouseenter', '#flyout-cart', function () {
+                    $(this).addClass('active');
+                }).on('mouseleave', '#flyout-cart', function () {
+                    $(this).removeClass('active');
+                });
+            });
+        </script>
+    }
+</div>

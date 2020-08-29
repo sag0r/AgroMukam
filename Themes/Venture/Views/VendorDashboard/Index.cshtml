@@ -1,0 +1,46 @@
+﻿@model Nop.Web.Areas.Admin.Models.Home.DashboardModel
+@using Nop.Core
+@using Nop.Services.Security
+@inject IPermissionService permissionService
+@inject IWorkContext _workContext
+
+@{
+    Layout = "_ColumnsOne";
+
+    Html.AppendCssFileParts("~/lib/ionicons/css/ionicons-2.0.1.min.css");
+    Html.AppendCssFileParts("~/lib/datatables/css/jquery.dataTables.css");
+    //title
+    Html.AddTitleParts(T("PageTitle.VendorDashboard.Home").Text);
+    //page class
+    Html.AppendPageCssClassParts("html-vendor-dashboard-home-page");
+
+    var vendor = _workContext.CurrentVendor;
+    var canManageOrders = permissionService.Authorize(StandardPermissionProvider.ManageOrders);
+    var canManageCustomers = permissionService.Authorize(StandardPermissionProvider.ManageCustomers);
+    var canManageProducts = permissionService.Authorize(StandardPermissionProvider.ManageProducts);
+    var canManageReturnRequests = permissionService.Authorize(StandardPermissionProvider.ManageReturnRequests);
+}
+<script asp-location="Footer" src="/lib/datatables/js/jquery.dataTables.js"></script>
+<div class="page vendor-dashboard-home-page">
+
+    <div class="page-title">
+        <h1> @vendor.Name's Dashboard </h1>
+    </div>
+    <div class="page-body">
+
+        <div class="container">
+            @if (canManageOrders)
+            {
+                <div class="row">
+                    <div class="col-12">
+                        @await Html.PartialAsync("_BestsellersBriefReportByQuantity", Model.BestsellersByQuantity)
+                    </div>
+                    @*<div class="col-12 mt-5">
+                        @await Html.PartialAsync("_BestsellersBriefReportByAmount", Model.BestsellersByAmount)
+                    </div>*@
+                </div>
+            }
+        </div>
+
+    </div>
+</div>

@@ -1,0 +1,184 @@
+﻿@model LanguageSelectorModel
+@using Microsoft.AspNetCore.Http
+@using Nop.Core
+@using Nop.Services.Seo
+@inject Nop.Core.IWebHelper webHelper
+@inject IHttpContextAccessor httpContextAccessor
+@inject IUrlRecordService _urlRecordService
+@inject IWorkContext _workContext
+
+@{
+    var customer = _workContext.CurrentCustomer;
+    var vendor = _workContext.CurrentVendor;
+    var seName = String.Empty;
+    var wrapperClass = String.Empty;
+
+    var isVendor = vendor != null && vendor.Active;
+
+    if (isVendor)
+    {
+        seName = _urlRecordService.GetSeName(vendor, 0, true, false);
+        wrapperClass = "float-left";
+    }
+
+}
+
+@if (Model.AvailableLanguages.Count > 1)
+{
+    <div class="language-selector desktop @wrapperClass">
+        @{
+            var returnUrl = webHelper.GetRawUrl(Context.Request);
+
+            if (Model.UseImages)
+            {
+                <ul class="language-list">
+                    @foreach (var lang in Model.AvailableLanguages)
+                    {
+                        <li>
+                            <a href="@Url.RouteUrl("ChangeLanguage", new { langid = lang.Id, returnUrl }, webHelper.CurrentRequestProtocol)" title="@lang.Name">
+                                <img title='@lang.Name' alt='@lang.Name' @(lang.Id == Model.CurrentLanguageId ? " class=selected" : null)
+                                     src="@Url.Content("~/images/flags/" + @lang.FlagImageFileName) " />
+                            </a>
+                        </li>
+                    }
+                </ul>
+            }
+            else
+            {
+                var languages = Model.AvailableLanguages.Select(lang => new SelectListItem
+                {
+                    Text = lang.Name,
+                    Value = Url.RouteUrl("ChangeLanguage", new { langid = lang.Id, returnUrl }, webHelper.CurrentRequestProtocol),
+                    Selected = lang.Id.Equals(Model.CurrentLanguageId)
+                });
+
+                <select id="customerlanguage" name="customerlanguage" asp-items="@languages" onchange="setLocation(this.value);" aria-label="@T("Languages.Selector.Label")"></select>
+            }
+        }
+
+        <div class="sell-on-site d-inline-block pl-4">
+            <button class="btn text-white" onclick="setLocation('/vendor-login')"> Sell on Site </button>
+        </div>
+    </div>
+
+    <div class="language-selector mobile mobile-selector">
+        @{
+            var currentLanguage = Model.AvailableLanguages.FirstOrDefault(x => x.Id.Equals(Model.CurrentLanguageId));
+
+            <div class="current-language-selector selector-title">@currentLanguage.Name</div>
+
+            <div class="language-selector-options mobile-collapse">
+
+                @for (int i = 0; i < Model.AvailableLanguages.Count; i++)
+                {
+                    var currentLanguageIterator = Model.AvailableLanguages[i];
+
+                    string selected = string.Empty;
+
+                    if (currentLanguageIterator.Id == currentLanguage.Id)
+                    {
+                        selected = " checked=\"checked\"";
+                    }
+
+                    <div class="selector-options-item">
+                        <input type="radio" name="language-selector" id="language-@i" value="@Url.RouteUrl("ChangeLanguage", new { langid = currentLanguageIterator.Id, returnUrl }, webHelper.CurrentRequestProtocol)" onclick="setLocation(this.value);" @Html.Raw(selected) />
+                        <label for="language-@i">@currentLanguageIterator.Name</label>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+}
+
+<style>
+    .vendor-menu a {
+        font-size: 14px;
+    }
+    .vendor-menu .dropdown-toggle {
+        color:rgba(255, 255, 255, .7) !important;
+    }
+</style>
+
+@if (customer.VendorId > 0)
+{
+<div class="vendor-menu">
+    <div class="dropdown float-left p-1">
+        <a class="btn text-white dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            
+            @T("Topmenu.Products")
+        </a>
+        <div class="dropdown-menu">
+            <a class="dropdown-item" href="/Admin/Product/List">
+                @T("Topmenu.ManageProducts")
+            </a>
+            <a class="dropdown-item" href="/Admin/Product/Create">
+                @T("Topmenu.AddProducts")
+            </a>
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item" href="@Url.RouteUrl("VendorManageImages")">
+                @T("Topmenu.ManageImages")
+            </a>
+        </div>
+    </div>
+    <div class="dropdown float-left p-1">
+        <a class="btn text-white dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            
+            @T("Topmenu.Orders")
+        </a>
+        <div class="dropdown-menu">
+            <a class="dropdown-item" href="/Admin/Order/List">
+                @T("Topmenu.ManageOrders")
+            </a>
+            <a class="dropdown-item" href="@Url.RouteUrl("VendorManageReviews")">
+                @T("Topmenu.ManageReviews")
+            </a>
+        </div>
+    </div>
+    <div class="dropdown float-left p-1">
+        <a class="btn text-white dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            
+            @T("Topmenu.Promotions")
+        </a>
+        <div class="dropdown-menu">
+            <a class="dropdown-item" href="@Url.RouteUrl("VendorCampaignManagement")">
+                @T("Topmenu.CampaignManagement")
+            </a>
+            <a class="dropdown-item" href="@Url.RouteUrl("VendorBundles")">
+                @T("Topmenu.Bundles")
+            </a>
+            <a class="dropdown-item" href="@Url.RouteUrl("VendorSellerVoucher")">
+                @T("Topmenu.SellerVoucher")
+            </a>
+            <a class="dropdown-item" href="@Url.RouteUrl("VendorFreeShipping")">
+                @T("Topmenu.FreeShipping")
+            </a>
+        </div>
+    </div>
+    @if (isVendor)
+    {
+        <div class="dropdown float-left p-1">
+            <a class="btn" href="/@seName" style="color:rgba(255, 255, 255, .7) !important;">
+                
+                @T("Topmenu.Store")
+            </a>
+        </div>
+    }
+    <div class="dropdown float-left p-1">
+        <a class="btn text-white dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            
+            @T("Topmenu.Finance")
+        </a>
+        <div class="dropdown-menu">
+            <a class="dropdown-item" href="@Url.RouteUrl("VendorAccountStatements")">
+                @T("Topmenu.AccountStatements")
+            </a>
+            <a class="dropdown-item" href="@Url.RouteUrl("VendorOrderOverview")">
+                @T("Topmenu.OrderOverview")
+            </a>
+            <a class="dropdown-item" href="@Url.RouteUrl("VendorTransactionOverview")">
+                @T("Topmenu.TransactionOverview")
+            </a>
+        </div>
+    </div>
+</div>
+}

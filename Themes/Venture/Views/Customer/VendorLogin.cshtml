@@ -1,0 +1,151 @@
+﻿@model LoginModel
+@using Nop.Core
+@using Nop.Core.Domain.Customers
+
+@inject IWebHelper webHelper
+@{
+    Layout = "_ColumnsOne";
+
+    //title
+    Html.AddTitleParts(T("PageTitle.Login").Text);
+    //page class
+    Html.AppendPageCssClassParts("html-login-page");
+
+    //register URL with return URL (if specified)
+    var registerUrl = Url.RouteUrl("RegisterAdv", new { returnUrl = this.Context.Request.Query["returnUrl"] }, webHelper.CurrentRequestProtocol);
+}
+<style>
+    .login-wrap .card {
+        max-width: 450px;
+    }
+</style>
+<div class="page login-page">
+
+    @await Html.PartialAsync("_VendorLoginPageAds")
+
+    <div class="page-body">
+        <div class="customer-blocks login-wrap">
+            <div class="card border-0 rounded-0 m-auto shadow">
+                <div class="card-body" style="padding-bottom: 45px;">
+                    <form asp-route="Login" asp-route-returnurl="@Context.Request.Query["ReturnUrl"]" method="post" id="loginForm">
+
+                        <div asp-validation-summary="ModelOnly" class="message-error">@T("Account.Login.Unsuccessful")</div>
+
+                        <div class="form-title pl-4 pr-4 pt-5">
+                            <h2 class="text-success">Welcome Back!</h2>
+                            <h4 class="text-muted">Login to access more features on AgroMukam</h4>
+                        </div>
+
+                        <div class="form-fields mt-4 pl-4 pr-4">
+                            @if (Model.UsernamesEnabled)
+                            {
+                            <div class="form-group inputs">
+                                <label asp-for="Username" asp-postfix=":"></label>
+                                <input asp-for="Username" type="hidden" />
+                                <div class="input-group">
+                                    <div class="input-group-prepend" style="max-width: 90px;">
+                                        <select id="phoneAreaCode" name="areaCode">
+                                            <option>(880)</option>
+                                        </select>
+                                    </div>
+                                    <input id="Phone"
+                                           name="Phone"
+                                           class="border-0"
+                                           style="width: 75%; background: #f0f0f0;"
+                                           autofocus="autofocus"
+                                           data-val="true"
+                                           data-val-required="Username is required." disabled />
+                                </div>
+                                <span class="field-validation-error" data-valmsg-for="Phone" data-valmsg-replace="true"></span>
+                            </div>
+                            }
+                            else
+                            {
+                                <div class="inputs">
+                                    <label asp-for="Email" asp-postfix=":"></label>
+                                    <input asp-for="Email" class="email" autofocus="autofocus" />
+                                    <span asp-validation-for="Email"></span>
+                                </div>
+                            }
+                        <div class="inputs">
+                            <label asp-for="Password" asp-postfix=":"></label>
+                            <input asp-for="Password"
+                                   class="password"
+                                   data-val="true"
+                                   data-val-required="Password is required." />
+                            <span class="field-validation-error" data-valmsg-for="Password" data-valmsg-replace="true"></span>
+                        </div>
+                            <div class="inputs reversed">
+                                <input asp-for="RememberMe" />
+                                <label asp-for="RememberMe"></label>
+                                <span class="forgot-password">
+                                    <a asp-route="PasswordRecovery">@T("Account.Login.ForgotPassword")</a>
+                                </span>
+                            </div>
+                            @if (Model.DisplayCaptcha)
+                            {
+                                <div class="captcha-box">
+                                    <nop-captcha />
+                                </div>
+                            }
+                        </div>
+                        <div class="buttons">
+                            <input class="button-1 login-button" type="submit" value="@T("Account.Login.LoginButton")" />
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+
+            <div class="text-center mt-4">
+                <h3>
+                    Not a AgroMukam Vendor?
+                    <br>
+                    <a href="@Url.RouteUrl("VendorRegistration")" class="text-greenish font-weight-bold"> Click here </a> to Register for a vendor account.
+                </h3>
+            </div>
+
+        </div>
+    </div>
+
+
+</div>
+
+<script asp-location="Footer">
+    $(document).ready(function () {
+        $('.master-wrapper-content').addClass('pt-5');
+
+        // Phone Area Code
+        $.getJSON('/Themes/Venture/Content/area-data/all.json', function (resp) {
+
+            var areaCodes = '';
+            for (var item of resp) {
+                areaCodes += `<option value="${item.code}"> (${item.code}) &nbsp;&nbsp;&nbsp; ${item.name} </option>`;
+            }
+            $('#phoneAreaCode')
+                .html(areaCodes)
+                .val('880');
+            $('#Phone').removeAttr('disabled');
+
+        });
+
+        // fix phone number auto correction for BD
+        $('#Phone').keyup(function (e) {
+            if (e.target.value.length > 1
+                && $('#phoneAreaCode').val() == '880'
+                && e.target.value.startsWith('0')
+            ) {
+                $(this).val(
+                    $(this).val()
+                        .replace('0', '')
+                );
+            }
+        });
+
+        $('#loginForm').submit(function (e) {
+            var areaCode = $('#phoneAreaCode').val();
+            var phoneNumber = $('#Phone').val();
+            $('#Username').val(areaCode + phoneNumber);
+        });
+    });
+</script>

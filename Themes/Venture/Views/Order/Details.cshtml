@@ -1,0 +1,304 @@
+@model OrderDetailsModel
+@using Nop.Core.Infrastructure
+@using Nop.Core.Domain.Customers;
+@{
+    if (!Model.PrintMode)
+    {
+        Layout = "_ColumnsOne";
+    }
+    else
+    {
+        Layout = "_Print";
+    }
+    //title
+    Html.AddTitleParts(T("PageTitle.OrderDetails").Text);
+    //page class
+    Html.AppendPageCssClassParts("html-order-details-page");
+
+    bool isLoggedIn = EngineContext.Current.Resolve<Nop.Core.IWorkContext>().CurrentCustomer.IsRegistered();
+}
+
+@if (Model.PrintMode)
+{
+    <script asp-location="Footer">
+        $(document).ready(function () {
+            window.print();
+        });
+    </script>
+}
+<div class="page order-details-page container">
+    <div class="page-body">
+        @await Component.InvokeAsync("Widget", new { widgetZone = PublicWidgetZones.OrderDetailsPageTop, additionalData = Model })
+        <div class="order-overview">
+
+            @if (String.IsNullOrEmpty(ViewBag.ErrorMessage))
+            {
+                <div class="row">
+                    <div class="col-6 text-left">
+                        <div class="order-number">
+                            <h3 class="font-weight-bold text-muted">
+                                @T("Order.Order#")@Model.CustomOrderNumber
+                            </h3>
+                            <p class="text-muted"> Placed on:  <span class="order-date">@Model.CreatedOn.ToString("dd MMM yyy - HH:mm")</span></p>
+                        </div>
+                    </div>
+                    @if (isLoggedIn)
+                    {
+                        <div class="col-6 text-right text-muted">
+                            @T("Order.OrderTotal"): <strong>@Model.OrderTotal</strong>
+                        </div>
+                    }
+                </div>
+                @await Component.InvokeAsync("Widget", new { widgetZone = PublicWidgetZones.OrderDetailsPageOverview, additionalData = Model })
+            }
+            else
+            {
+                <div class="row">
+                    <div class="col order-details-error text-center">
+                        <h3>
+                            @ViewBag.ErrorMessage
+                        </h3>
+                    </div>
+                </div>
+            }
+
+        </div>
+
+        @if (Model.Items.Count > 0)
+        {
+            if (!Model.PrintMode && Model.OrderNotes.Count > 0)
+            {
+                <div class="section order-notes">
+                    <div class="title">
+                        <strong>@T("Order.Notes")</strong>
+                    </div>
+                    <div class="table-wrapper">
+                        <table class="data-table">
+                            <colgroup>
+                                <col />
+                                <col />
+                            </colgroup>
+                            <thead>
+                                <tr>
+                                    <th class="created-on">
+                                        @T("Order.Notes.CreatedOn")
+                                    </th>
+                                    <th class="note">
+                                        @T("Order.Notes.Note")
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.OrderNotes)
+                                {
+                                    <tr>
+                                        <td class="created-on">
+                                            @item.CreatedOn.ToString()
+                                        </td>
+                                        <td class="note">
+                                            @Html.Raw(item.Note)
+                                            @if (item.HasDownload)
+                                            {
+                                                <p class="download">
+                                                    <a href="@Url.RouteUrl("GetOrderNoteFile", new { ordernoteid = item.Id })">@T("Order.Notes.Download")</a>
+                                                </p>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            }
+            @await Component.InvokeAsync("Widget", new { widgetZone = PublicWidgetZones.OrderDetailsPageBeforeproducts, additionalData = Model })
+            <div class="section products">
+                <div class="order-items-wrapper">
+                    @{
+                        var orderItems = Model.Items.GroupBy(x => x.VendorName);
+                        int i = 1;
+                    }
+                    @foreach (var orderItem in orderItems)
+                    {
+                        var vendorName = orderItem.FirstOrDefault().VendorName;
+                        <div class="card border-0 rounded-0 shadow-sm mb-4">
+                            <div class="card-header border-0">
+                                <h3 class="font-weight-bold text-muted"><i class="fas fa-box mr-2"></i> Package @i </h3>
+                                @{
+                                    i++;
+                                }
+                                <h4 class="mt-2 text-muted">Sold By: <a class="text-primary" href="#">@vendorName</a> </h4>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-6">
+                                        @if (Model.ShippingStatus != "Delivered")
+                                        {
+                                            var orderDate = Model.CreatedOn;
+                                            var fourthDay = orderDate.AddDays(4);
+                                            var eighthDay = orderDate.AddDays(8);
+                                            var sameMonth = fourthDay.ToString("MMMM") == eighthDay.ToString("MMMM");
+                                            <span class="text-greenish">
+                                                Estimated Delivery By
+                                                @fourthDay.Day
+                                                @(sameMonth ? "" : fourthDay.ToString("MMMM"))
+                                                - @eighthDay.Day @eighthDay.ToString("MMMM")
+                                                @eighthDay.Year
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-greenish"> @Model.ShippingStatus </span>
+                                        }
+                                    </div>
+                                    <div class="col-6 text-right">
+                                        <h4>
+                                            <i class="fas fa-truck-loading mr-2"></i>
+                                            Standard
+                                        </h4>
+                                    </div>
+                                </div>
+
+                                <div class="row mt-5 mb-5">
+                                    <div class="col-12">
+                                        <ul class="timeline" id="timeline">
+                                            @{
+                                                var orderStatus = Model.OrderStatus != "Pending" && Model.OrderStatus != "Cancelled";
+                                                var orderStatusClass = orderStatus ? "complete" : "in-complete";
+
+                                                var shippingStatus = Model.ShippingStatus == "Shipped" || Model.ShippingStatus.Contains("Partially") || Model.ShippingStatus == "Delivered";
+                                                var shippingStatusClass = shippingStatus ? "complete" : "in-complete";
+
+                                                var delivered = Model.ShippingStatus == "Delivered";
+                                                var deliveredClass = delivered ? "complete" : "in-complete";
+                                            }
+                                            <li class="li complete">
+                                                <div class="timestamp">
+                                                    <span class="date text-muted">Payment</span>
+                                                </div>
+                                                <div class="status pt-3">
+                                                    <h4> @Model.PaymentMethodStatus </h4>
+                                                </div>
+                                            </li>
+                                            <li class="li @orderStatusClass">
+                                                <div class="timestamp">
+                                                    <span class="date text-muted">
+                                                        @DateTime.Now.ToString("dd MMM yyy - HH:mm")
+                                                    </span>
+                                                </div>
+                                                <div class="status pt-3">
+                                                    <h4> @Model.OrderStatus </h4>
+                                                </div>
+                                            </li>
+                                            <li class="li @shippingStatusClass">
+                                                @if (shippingStatus)
+                                                {
+                                                    var shippedDate = @Model.Shipments.LastOrDefault().ShippedDate;
+                                                    var formattedShippedDate = DateTime.Parse(shippedDate.ToString());
+                                                    <div class="timestamp">
+                                                        <span class="date text-muted">
+                                                            @formattedShippedDate.ToString("dd MMM yyy - HH:mm")
+                                                        </span>
+                                                    </div>
+                                                    <div class="status pt-3">
+                                                        <h4> @Model.ShippingStatus </h4>
+                                                    </div>
+                                                }
+                                                else
+                                                {
+                                                    <div class="timestamp">
+                                                        &nbsp;
+                                                    </div>
+                                                    <div class="status pt-3">
+                                                        &nbsp;
+                                                    </div>
+                                                }
+                                            </li>
+                                            <li class="li @deliveredClass">
+                                                @if (delivered)
+                                                {
+                                                    var completeDate = @Model.Shipments.LastOrDefault().ShippedDate;
+                                                    var formattedCompleteDate = DateTime.Parse(completeDate.ToString());
+                                                    <div class="timestamp">
+                                                        <span class="date text-muted">
+                                                            @formattedCompleteDate.ToString("dd MMM yyy - HH:mm")
+                                                        </span>
+                                                    </div>
+                                                    <div class="status pt-3">
+                                                        <h4> Complete </h4>
+                                                    </div>
+                                                }
+                                                else
+                                                {
+                                                    <div class="timestamp">
+                                                        &nbsp;
+                                                    </div>
+                                                    <div class="status pt-3">
+                                                        &nbsp;
+                                                    </div>
+                                                }
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+
+                                <div class="row mt-3">
+                                    <div class="col-12">
+                                        <div class="table-wrapper">
+                                            <table class="data-table">
+                                                <tbody>
+                                                    @foreach (var item in orderItem.ToList())
+                                                    {
+                                                        <tr>
+                                                            <td class="product">
+                                                                @if (!Model.PrintMode)
+                                                                {
+                                                                    <em><a class="d-block" style="height: 20px; max-width: 320px; overflow: hidden;" href="@Url.RouteUrl("Product", new { SeName = item.ProductSeName })">@item.ProductName</a></em>
+                                                                }
+                                                                else
+                                                                {
+                                                                    @item.ProductName
+                                                                }
+                                                            </td>
+                                                            <td class="quantity" style="min-width: 100px;">
+                                                                <span class="product-quantity">
+                                                                    <span class="text-muted" style="opacity: .5;">Qty:</span>
+                                                                    @item.Quantity
+                                                                </span>
+                                                            </td>
+                                                            @if (isLoggedIn)
+                                                            {
+                                                                <td class="quantity" style="min-width: 100px;">
+                                                                    <span class="product-price">@item.UnitPrice</span>
+                                                                </td>
+                                                                <td class="order-status">
+                                                                    <a class="text-primary" href="#">Cancel</a>
+                                                                </td>
+                                                            }
+                                                            else
+                                                            {
+                                                                <td class="order-status">
+                                                                    <a class="text-primary" href="@Url.RouteUrl("Login", new { returnUrl = this.Context.Request.Query["returnUrl"] })">
+                                                                        Login to see details
+                                                                    </a>
+                                                                </td>
+                                                            }
+
+                                                        </tr>
+                                                    }
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+            @await Component.InvokeAsync("Widget", new { widgetZone = PublicWidgetZones.OrderDetailsPageAfterproducts, additionalData = Model })
+
+        }
+        @await Component.InvokeAsync("Widget", new { widgetZone = PublicWidgetZones.OrderDetailsPageBottom, additionalData = Model })
+    </div>
+</div>
