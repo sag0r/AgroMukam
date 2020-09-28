@@ -463,3 +463,10 @@ span.menu-close-btn {
     display: block;
     line-height: 25px;
   }
+
+
+.product-perishable {
+  font-size: 13px;
+  line-height: 16px;
+  display: inline-block;
+}

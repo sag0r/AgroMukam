@@ -171,6 +171,11 @@
                                         <div class="col-9 pl-2 pr-2">
                                             <div class="row">
                                                 <div class="col-12 text-left col-md-5 pl-5 pr-2">
+                                                    @{
+                                                        var perishable = item.IsPerishable ? "Perishable" : "Non-Perishable";
+                                                        var colorClass = item.IsPerishable ? "bg-danger" : "bg-success";
+                                                        <span class="@colorClass text-white rounded-pill pl-2 pr-2 mb-1 product-perishable"> @perishable </span>
+                                                    }
                                                     <h4 class="font-weight-light">
                                                         <a href="@Url.RouteUrl("Product", new { SeName = item.ProductSeName })" class="product-name">
                                                             @item.ProductName
@@ -306,13 +311,11 @@
                             </div>
                         }
 
-                        <button type="submit"
+                        <a href="@Url.RouteUrl("ShoppingCartFinal")"
                                 id="checkout"
-                                name="checkout"
-                                value="checkout"
                                 class="btn btn-success bg-greenish btn-block border-0 rounded-0 shadow-sm mt-3">
                             @T("Checkout.Button")
-                        </button>
+                        </a>
                     </div>
                 </div>
             </div>

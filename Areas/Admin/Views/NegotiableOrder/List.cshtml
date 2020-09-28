@@ -1,0 +1,137 @@
+﻿@model NegotiableOrderSearchModel
+
+@{
+    //page title
+    ViewBag.Title = T("Admin.Sales.NegotiableOrder").Text;
+    //active menu item (system name)
+    Html.SetActiveMenuItemSystemName("NegotiableOrders");
+}
+
+<nop-antiforgery-token />
+<div class="content-header clearfix">
+    <h1 class="pull-left">
+        @T("Admin.Sales.NegotiableOrder")
+    </h1>
+</div>
+
+<div class="content">
+    <div class="panel-group">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                @await Html.PartialAsync("Table", new DataTablesModel
+                {
+                    Name = "negotiable-orders-grid",
+                    UrlRead = new DataUrl("List", "NegotiableOrder", null),
+                    Length = Model.PageSize,
+                    LengthMenu = Model.AvailablePageSizes,
+                    ColumnCollection = new List<ColumnProperty>
+                    {
+                        new ColumnProperty(nameof(NegotiableOrderItemModel.Id))
+                        {
+                            Title = "#",
+                            Render = new RenderCustom("markRowGroupHeader")
+                        },
+                        new ColumnProperty(nameof(NegotiableOrderItemModel.ProductName))
+                        {
+                            Title = T("Admin.Sales.NegotiableOrders.Fields.ProductName").Text,
+                            Width = "250"
+                        },
+                        new ColumnProperty(nameof(NegotiableOrderItemModel.Customer))
+                        {
+                            Title = T("Admin.Sales.NegotiableOrders.Fields.Customer").Text
+                        },
+                        new ColumnProperty(nameof(NegotiableOrderItemModel.OrderStatus))
+                        {
+                            Title = T("Admin.Sales.NegotiableOrders.Fields.OrderStatus").Text,
+                            Render = new RenderCustom("prepareStatusColumn")
+                        },
+                        new ColumnProperty(nameof(NegotiableOrderItemModel.PaymentStatus))
+                        {
+                            Title = T("Admin.Sales.NegotiableOrders.Fields.PaymentStatus").Text,
+                            Render = new RenderCustom("prepareStatusColumn")
+                        },
+                        new ColumnProperty(nameof(NegotiableOrderItemModel.ShippingStatus))
+                        {
+                            Title = T("Admin.Sales.NegotiableOrders.Fields.ShippingStatus").Text,
+                            Render = new RenderCustom("prepareStatusColumn")
+                        },
+                        new ColumnProperty(nameof(NegotiableOrderItemModel.CreatedOnUtc))
+                        {
+                            Title = T("Admin.Sales.NegotiableOrders.Fields.CreatedOnUtc").Text,
+                            Render = new RenderDate()
+                        },
+                        new ColumnProperty(nameof(NegotiableOrderItemModel.Id))
+                        {
+                            Title = T("Admin.Common.Edit").Text,
+                            Width = "100",
+                            ClassName =  NopColumnClassDefaults.Button,
+                            Render = new RenderButtonEdit(new DataUrl("Edit"))
+                        }
+                    }
+                })
+            </div>
+
+            <script>
+
+                const statusDefinitions = {
+                    Pending: 'label-default',
+                    Processing: 'label-primary',
+                    Complete: 'label-success',
+                    Cancelled: 'label-danger',
+                    Authorized: 'label-success',
+                    Paid: 'label-success',
+                    Refunded: 'label-warning',
+                    PartiallyRefunded: 'label-warning',
+                    Voided: 'label-danger',
+                    NotYetShipped: 'label-default',
+                    PartiallyShipped: 'label-primary',
+                    Shipped: 'label-primary',
+                    Delivered: 'label-success'
+                };
+
+                const throupHeaderStyle = "background-color: #f1f1f1;color:#808080;";
+                var indexer = 0;
+
+                function markRowGroupHeader(data, type, row, meta) {
+                    const orderId = row.OrderId;
+                    var text = data;
+
+                    if (orderId != indexer) {
+                        text = `<span data-order-id='${orderId}'> ${text} </span>`;
+                        indexer = orderId;
+                    }
+
+                    return text;
+                }
+
+                function insertRowGroupHeader(elem) {
+                    const parentRow = $(elem).parent().parent();
+                    const orderId = $(elem).data('order-id');
+                    $(`<tr style="${throupHeaderStyle}">
+                            <td colspan="8"> Order #${orderId} </td>
+                    </tr>`).insertBefore(parentRow);
+                }
+
+                function prepareStatusColumn(data, type, row, meta) {
+                    const className = statusDefinitions[data];
+                    return `<span class="label ${className}">${data}</span>`;
+                }
+
+                $(document).ready(function () {
+
+                    $('#negotiable-orders-grid_wrapper')
+                        .on('draw.dt', function () {
+                            $('tr td span[data-order-id]')
+                                .each(function () {
+                                    insertRowGroupHeader(this);
+                                });
+                        });
+
+                });
+
+
+            </script>
+
+        </div>
+    </div>
+</div>

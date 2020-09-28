@@ -1,0 +1,11 @@
+﻿{
+	"Group": "nop4you",
+	"FriendlyName": "OData plugin",
+	"SystemName": "Misc.OData",
+	"Version": "4.30.06",
+	"SupportedVersions": [ "4.30" ],
+	"Author": "nop4you",
+	"DisplayOrder": 1,
+	"FileName": "Nop.Plugin.Misc.OData.dll",
+	"Description": "Plugin OData for nopCommerce gives an access to business data stored in nopCommerce database."
+}
