@@ -1,0 +1,50 @@
+﻿@model Nop.Web.Models.Customer.CustomerWishRequestCreateModel
+
+@{
+    ViewData["Title"] = "CustomerWishRequest";
+}
+
+<h2>CustomerWishRequest</h2>
+
+<h4>CustomerWishRequestCreateModel</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="CategoryId" class="control-label"></label>
+                <input asp-for="CategoryId" class="form-control" />
+                <span asp-validation-for="CategoryId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Title" class="control-label"></label>
+                <input asp-for="Title" class="form-control" />
+                <span asp-validation-for="Title" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="ExpectedPrice" class="control-label"></label>
+                <input asp-for="ExpectedPrice" class="form-control" />
+                <span asp-validation-for="ExpectedPrice" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="ExpectedStartDateUtc" class="control-label"></label>
+                <input asp-for="ExpectedStartDateUtc" class="form-control" />
+                <span asp-validation-for="ExpectedStartDateUtc" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="ExpectedEndDateUtc" class="control-label"></label>
+                <input asp-for="ExpectedEndDateUtc" class="form-control" />
+                <span asp-validation-for="ExpectedEndDateUtc" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-default" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+

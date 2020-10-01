@@ -25,41 +25,47 @@
 
 @if (Model.AvailableLanguages.Count > 1)
 {
-    <div class="language-selector desktop @wrapperClass">
-        @{
-            var returnUrl = webHelper.GetRawUrl(Context.Request);
+<div class="language-selector desktop @wrapperClass">
+    @{
+        var returnUrl = webHelper.GetRawUrl(Context.Request);
 
-            if (Model.UseImages)
-            {
-                <ul class="language-list">
-                    @foreach (var lang in Model.AvailableLanguages)
-                    {
-                        <li>
-                            <a href="@Url.RouteUrl("ChangeLanguage", new { langid = lang.Id, returnUrl }, webHelper.CurrentRequestProtocol)" title="@lang.Name">
-                                <img title='@lang.Name' alt='@lang.Name' @(lang.Id == Model.CurrentLanguageId ? " class=selected" : null)
-                                     src="@Url.Content("~/images/flags/" + @lang.FlagImageFileName) " />
-                            </a>
-                        </li>
-                    }
-                </ul>
-            }
-            else
-            {
-                var languages = Model.AvailableLanguages.Select(lang => new SelectListItem
+        if (Model.UseImages)
+        {
+            <ul class="language-list">
+                @foreach (var lang in Model.AvailableLanguages)
                 {
-                    Text = lang.Name,
-                    Value = Url.RouteUrl("ChangeLanguage", new { langid = lang.Id, returnUrl }, webHelper.CurrentRequestProtocol),
-                    Selected = lang.Id.Equals(Model.CurrentLanguageId)
-                });
-
-                <select id="customerlanguage" name="customerlanguage" asp-items="@languages" onchange="setLocation(this.value);" aria-label="@T("Languages.Selector.Label")"></select>
-            }
+                    <li>
+                        <a href="@Url.RouteUrl("ChangeLanguage", new { langid = lang.Id, returnUrl }, webHelper.CurrentRequestProtocol)" title="@lang.Name">
+                            <img title='@lang.Name' alt='@lang.Name' @(lang.Id == Model.CurrentLanguageId ? " class=selected" : null)
+                                 src="@Url.Content("~/images/flags/" + @lang.FlagImageFileName) " />
+                        </a>
+                    </li>
+                }
+            </ul>
         }
+        else
+        {
+            var languages = Model.AvailableLanguages.Select(lang => new SelectListItem
+            {
+                Text = lang.Name,
+                Value = Url.RouteUrl("ChangeLanguage", new { langid = lang.Id, returnUrl }, webHelper.CurrentRequestProtocol),
+                Selected = lang.Id.Equals(Model.CurrentLanguageId)
+            });
 
-        <div class="sell-on-site d-inline-block pl-4">
-            <button class="btn text-white" onclick="setLocation('/vendor-login')"> Sell on Site </button>
-        </div>
+            <select id="customerlanguage" name="customerlanguage" asp-items="@languages" onchange="setLocation(this.value);" aria-label="@T("Languages.Selector.Label")"></select>
+        }
+    }
+
+    <div class="sell-on-site d-inline-block pl-4">
+        <button class="btn text-white" onclick="setLocation('/vendor-login')"> Sell on Site </button>
     </div>
+    <div class="sell-on-site d-inline-block pl-4">
+        <button class="btn text-white" onclick="setLocation('/customer-wish-request/all/')">
+            <i class="fas fa-praying-hands"></i>
+            Customer Wish
+        </button>
+    </div>
+</div>
 
     <div class="language-selector mobile mobile-selector">
         @{

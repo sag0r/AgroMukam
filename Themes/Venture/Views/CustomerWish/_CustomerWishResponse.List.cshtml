@@ -1,0 +1,44 @@
+﻿@model IList<CustomerWishResponseListModel>
+@inject Nop.Services.Customers.ICustomerService _customerService
+@inject Nop.Services.Vendors.IVendorService _vendorService
+@inject Nop.Core.IWorkContext _workContext
+
+
+    <hr class="mt-4 mb-2" style="border: none; height: 1px; background: #eee;" />
+@if (Model.Count > 0)
+{
+    <h3 class="text-muted mb-2"> Responses </h3>
+    foreach (var item in Model)
+    {
+        <div class="card rounded-0 shadow-smx mb-2" data-id="@item.Id">
+            <div class="card-body p-2">
+
+                @if (item.VendorId.HasValue)
+                {
+                    var vendor = _vendorService.GetVendorById((int)item.VendorId);
+                    <span class="text-muted font-weight-normal">
+                        <small> @vendor.SystemName </small>
+                    </span>
+                }
+                else
+                {
+                    var id = _workContext.CurrentCustomer.Id;
+                    var customer = _customerService.GetCustomerById(id);
+                    <span class="text-muted font-weight-normal">
+                        <small> @customer.SystemName </small>
+                    </span>
+                }
+                <hr class="mt-2 mb-2" style="border: none; height: 1px; background: #eee;" />
+                <p class="mt-2"> @item.CommentText </p>
+                <h4 class="mt-2"> Asking Price: @item.ProposedPrice.ToString("#0.00") </h4>
+                <hr class="mt-2 mb-2" style="border: none; height: 1px; background: #eee;" />
+                <span class="text-muted font-weight-normal"><small> Estimated Delivery by @item.DeliveryEndDateUtc.ToString("dd/mm/yyyy") </small></span>
+
+            </div>
+        </div>
+    }
+}
+else
+{
+    <h3 class="text-center text-muted"> No response yet</h3>
+}
